@@ -1,0 +1,6 @@
+{
+  "name": "ERMIA — Personal Portfolio",
+  "description": "Obsidian black personal portfolio for Ermia Yazdani featuring Liquid Glass navigation, spatial interface case studies, and design engineering work.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

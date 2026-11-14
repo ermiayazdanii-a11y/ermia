@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ERMIA — Ideas Become Reality</title>
+    <meta
+      name="description"
+      content="ERMIA — Personal digital space of Ermia Yazdani. Exploring technology, learning Python and web foundations, playing guitar, and building the FLOW daily-life project."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ERMIA" />
+    <meta property="og:title" content="ERMIA — Ideas Become Reality" />
+    <meta
+      property="og:description"
+      content="ERMIA — Personal digital space of Ermia Yazdani. Exploring technology, learning Python and web foundations, playing guitar, and building the FLOW daily-life project."
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="fa_IR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ERMIA — Ideas Become Reality" />
+    <meta
+      name="twitter:description"
+      content="ERMIA — Personal digital space of Ermia Yazdani. Exploring technology, learning Python and web foundations, playing guitar, and building the FLOW daily-life project."
+    />
+    <meta name="theme-color" content="#090C09" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#F4F5EF" media="(prefers-color-scheme: light)" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=Vazirmatn:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Prevent theme flash before first paint while honoring system preference & persisted manual choice -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('ermia-theme');
+          var prefersDark =
+            window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark =
+            stored === 'dark' || (stored !== 'light' && prefersDark);
+          var root = document.documentElement;
+          root.classList.toggle('dark', isDark);
+          root.style.colorScheme = isDark ? 'dark' : 'light';
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Ermia Yazdani",
+        "alternateName": "ERMIA",
+        "sameAs": ["https://github.com/ermiayazdanii-a11y"],
+        "knowsAbout": [
+          "Python (Learning)",
+          "HTML Basics",
+          "Guitar",
+          "Music",
+          "FLOW Concept"
+        ]
+      }
+    </script>
+  </head>
+  <body class="bg-[var(--ermia-bg)] text-[var(--ermia-text)] antialiased selection:bg-[var(--ermia-accent)]/25 selection:text-[var(--ermia-text)]">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
