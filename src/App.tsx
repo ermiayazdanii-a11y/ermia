@@ -9,6 +9,7 @@ import { HeroSection } from './components/HeroSection';
 import { JournalSection } from './components/JournalSection';
 import { JourneyTimelineSection } from './components/JourneyTimelineSection';
 import { LiquidGlassNav } from './components/LiquidGlassNav';
+import { LiquidPortalDivider } from './components/LiquidPortalDivider';
 import { ProjectsSection } from './components/ProjectsSection';
 import { ScrollProgress } from './components/ScrollProgress';
 import { SkillsInterestsSection } from './components/SkillsInterestsSection';
@@ -18,6 +19,20 @@ import { ERMIA_CONTENT, Locale } from './data/ermiaData';
 import { LENIS_CONFIG, ThemeMode } from './styles/designTokens';
 
 const THEME_STORAGE_KEY = 'ermia-theme';
+const LOCALE_STORAGE_KEY = 'ermia-locale';
+
+function getInitialLocale(): Locale {
+  if (typeof window === 'undefined') return 'en';
+  try {
+    const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (stored === 'en' || stored === 'fa') {
+      return stored;
+    }
+  } catch {
+    // Ignore storage read errors and fall back to English default
+  }
+  return 'en';
+}
 
 function getInitialTheme(): ThemeMode {
   if (typeof window === 'undefined') return 'dark';
@@ -35,7 +50,7 @@ function getInitialTheme(): ThemeMode {
 }
 
 export default function App() {
-  const [locale, setLocale] = useState<Locale>('en');
+  const [locale, setLocale] = useState<Locale>(getInitialLocale);
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
   const [activeSection, setActiveSection] = useState('home');
   const lenisRef = useRef<LenisRef | null>(null);
@@ -89,6 +104,18 @@ export default function App() {
         localStorage.setItem(THEME_STORAGE_KEY, next);
       } catch {
         // Storage disabled; state updates smoothly in-memory
+      }
+      return next;
+    });
+  }, []);
+
+  const handleToggleLocale = useCallback(() => {
+    setLocale((prev) => {
+      const next: Locale = prev === 'en' ? 'fa' : 'en';
+      try {
+        localStorage.setItem(LOCALE_STORAGE_KEY, next);
+      } catch {
+        // Storage disabled; state updates cleanly in-memory
       }
       return next;
     });
@@ -209,6 +236,13 @@ export default function App() {
 
   const pageShell = (
     <div className="relative min-h-screen bg-[var(--ermia-bg)] text-[var(--ermia-text)] transition-colors duration-300">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-[var(--ermia-accent)] focus:px-4 focus:py-2.5 focus:text-xs focus:font-semibold focus:text-[var(--ermia-accent-contrast)] focus:shadow-lg focus:outline-none"
+      >
+        {locale === 'fa' ? 'پرش به محتوای اصلی' : 'Skip to main content'}
+      </a>
+
       <AmbientBackground />
 
       <CursorSpotlight theme={theme} />
@@ -225,15 +259,14 @@ export default function App() {
         content={content.nav}
         activeSection={activeSection}
         onNavigate={scrollToSection}
-        onToggleLocale={() =>
-          setLocale((prev) => (prev === 'en' ? 'fa' : 'en'))
-        }
+        onToggleLocale={handleToggleLocale}
         onToggleTheme={handleToggleTheme}
       />
 
-      <main className="relative z-10">
+      <main id="main-content" className="relative z-10">
         <HeroSection
           locale={locale}
+          theme={theme}
           content={content.hero}
           onNavigate={scrollToSection}
         />
@@ -250,7 +283,17 @@ export default function App() {
           onScrollToElement={scrollToElementCentered}
         />
 
+        <LiquidPortalDivider
+          direction="down"
+          bottomBgClass="text-[var(--ermia-bg-secondary)]/70"
+        />
+
         <ProjectsSection theme={theme} content={content.projects} />
+
+        <LiquidPortalDivider
+          direction="up"
+          bottomBgClass="text-[var(--ermia-bg-secondary)]/70"
+        />
 
         <SkillsInterestsSection
           locale={locale}

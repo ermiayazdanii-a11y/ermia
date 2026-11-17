@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLenis } from 'lenis/react';
 import { ArrowUpLeft, ArrowUpRight, X } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
@@ -7,6 +8,7 @@ import {
   JournalEntry,
   Locale,
 } from '../data/ermiaData';
+import { useModalFocusTrap } from '../hooks/useModalFocusTrap';
 import { MOTION_EASE } from '../styles/designTokens';
 import { ScrollReveal } from './ScrollReveal';
 import { TextReveal } from './TextReveal';
@@ -18,34 +20,31 @@ interface JournalSectionProps {
 
 export function JournalSection({ locale, content }: JournalSectionProps) {
   const [activeEntry, setActiveEntry] = useState<JournalEntry | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const lenis = useLenis();
 
-  useEffect(() => {
-    if (!activeEntry) return;
-    closeButtonRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setActiveEntry(null);
-    };
-    document.body.style.overflow = 'hidden';
-    lenis?.stop();
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = '';
-      lenis?.start();
-      window.removeEventListener('keydown', onKey);
-      lastTriggerRef.current?.focus();
-    };
-  }, [activeEntry, lenis]);
+  const handleClose = useCallback(() => {
+    setActiveEntry(null);
+  }, []);
+
+  useModalFocusTrap({
+    isOpen: Boolean(activeEntry),
+    dialogRef,
+    initialFocusRef: closeButtonRef,
+    triggerRef: lastTriggerRef,
+    onClose: handleClose,
+    lenis,
+  });
 
   const ReadArrow = locale === 'fa' ? ArrowUpLeft : ArrowUpRight;
 
   return (
     <section
       id="journal"
-      className="border-t border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/70 py-20 sm:py-28"
+      className="scroll-mt-24 border-t border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/70 py-20 sm:py-28"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <ScrollReveal className="max-w-2xl">
@@ -60,6 +59,7 @@ export function JournalSection({ locale, content }: JournalSectionProps) {
           </div>
           <TextReveal
             as="h2"
+            splitWords
             className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
           >
             {content.title}
@@ -106,7 +106,7 @@ export function JournalSection({ locale, content }: JournalSectionProps) {
                 </div>
 
                 <div className="flex items-center justify-start lg:col-span-2 lg:justify-end">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[var(--ermia-accent)]">
+                  <span className="inline-flex min-h-[36px] items-center gap-1.5 text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 transition-transform duration-150 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 group-hover:text-[var(--ermia-accent)]">
                     <span>{content.readNoteLabel}</span>
                     <ReadArrow className="h-3.5 w-3.5" strokeWidth={1.75} />
                   </span>
@@ -117,88 +117,99 @@ export function JournalSection({ locale, content }: JournalSectionProps) {
         </ScrollReveal>
       </div>
 
-      {/* Animated Journal Reader Modal with Focus Restoration & Lenis Isolation */}
-      <AnimatePresence>
-        {activeEntry && (
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="journal-note-title"
-            data-lenis-prevent
-            initial={prefersReducedMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--ermia-bg)]/92 p-4 backdrop-blur-xl sm:p-6"
-          >
-            <div
-              aria-hidden="true"
-              onClick={() => setActiveEntry(null)}
-              className="absolute inset-0"
-            />
-
-            <motion.div
-              initial={
-                prefersReducedMotion ? false : { opacity: 0, scale: 0.97, y: 12 }
-              }
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={
-                prefersReducedMotion ? undefined : { opacity: 0, scale: 0.98, y: 8 }
-              }
-              transition={{ duration: 0.25, ease: MOTION_EASE.cinematic }}
-              className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[var(--ermia-border-strong)] bg-[var(--ermia-surface)] shadow-2xl"
-            >
-              <div className="flex items-center justify-between gap-4 border-b border-[var(--ermia-border)] px-6 py-4">
-                <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--ermia-text-secondary)]">
-                  <span className="font-mono tabular-nums text-[var(--ermia-accent)]">
-                    {activeEntry.index}
-                  </span>
-                  <span aria-hidden="true">·</span>
-                  <span>{activeEntry.category}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>{activeEntry.readTime}</span>
-                </div>
-
-                <button
-                  ref={closeButtonRef}
-                  type="button"
-                  aria-label={content.closeAria}
-                  onClick={() => setActiveEntry(null)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)] text-[var(--ermia-text)] transition-colors duration-150 hover:border-[var(--ermia-accent)] hover:text-[var(--ermia-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
-                >
-                  <X className="h-4 w-4" strokeWidth={2} />
-                </button>
-              </div>
-
-              <div
+      {/* Animated Journal Reader Modal with Focus Trap, Portal Isolation & Lenis Lock */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <AnimatePresence>
+            {activeEntry && (
+              <motion.div
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="journal-note-title"
+                tabIndex={-1}
                 data-lenis-prevent
-                className="overflow-y-auto px-6 py-7 sm:px-8 sm:py-8"
+                initial={prefersReducedMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--ermia-bg)]/92 p-4 backdrop-blur-xl outline-none sm:p-6"
               >
-                <h2
-                  id="journal-note-title"
-                  className="font-display text-2xl font-semibold leading-snug tracking-tight text-[var(--ermia-text)] sm:text-3xl text-balance"
-                >
-                  {activeEntry.title}
-                </h2>
-                <p className="mt-4 border-b border-[var(--ermia-border)] pb-5 text-sm leading-[1.75] text-[var(--ermia-text)]/85 sm:text-base">
-                  {activeEntry.excerpt}
-                </p>
+                <div
+                  aria-hidden="true"
+                  onClick={handleClose}
+                  className="absolute inset-0"
+                />
 
-                <div className="mt-6 space-y-5">
-                  {activeEntry.paragraphs.map((p, i) => (
-                    <p
-                      key={i}
-                      className="text-sm leading-[1.85] text-[var(--ermia-text-secondary)] sm:text-base"
+                <motion.div
+                  initial={
+                    prefersReducedMotion
+                      ? false
+                      : { opacity: 0, scale: 0.97, y: 12 }
+                  }
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={
+                    prefersReducedMotion
+                      ? undefined
+                      : { opacity: 0, scale: 0.98, y: 8 }
+                  }
+                  transition={{ duration: 0.25, ease: MOTION_EASE.cinematic }}
+                  className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[var(--ermia-border-strong)] bg-[var(--ermia-surface)] shadow-2xl"
+                >
+                  <div className="flex items-center justify-between gap-4 border-b border-[var(--ermia-border)] px-6 py-4">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--ermia-text-secondary)]">
+                      <span className="font-mono tabular-nums text-[var(--ermia-accent)]">
+                        {activeEntry.index}
+                      </span>
+                      <span aria-hidden="true">·</span>
+                      <span>{activeEntry.category}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>{activeEntry.readTime}</span>
+                    </div>
+
+                    <button
+                      ref={closeButtonRef}
+                      type="button"
+                      aria-label={content.closeAria}
+                      onClick={handleClose}
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)] text-[var(--ermia-text)] transition-colors duration-150 hover:border-[var(--ermia-accent)] hover:text-[var(--ermia-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
                     >
-                      {p}
+                      <X className="h-4 w-4" strokeWidth={2} />
+                    </button>
+                  </div>
+
+                  <div
+                    tabIndex={0}
+                    data-lenis-prevent
+                    className="overflow-y-auto overscroll-contain px-6 py-7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ermia-accent)] sm:px-8 sm:py-8"
+                  >
+                    <h2
+                      id="journal-note-title"
+                      className="font-display text-2xl font-semibold leading-snug tracking-tight text-[var(--ermia-text)] sm:text-3xl text-balance"
+                    >
+                      {activeEntry.title}
+                    </h2>
+                    <p className="mt-4 border-b border-[var(--ermia-border)] pb-5 text-sm leading-[1.75] text-[var(--ermia-text)]/85 sm:text-base">
+                      {activeEntry.excerpt}
                     </p>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+
+                    <div className="mt-6 space-y-5">
+                      {activeEntry.paragraphs.map((p, i) => (
+                        <p
+                          key={i}
+                          className="text-sm leading-[1.85] text-[var(--ermia-text-secondary)] sm:text-base"
+                        >
+                          {p}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </section>
   );
 }

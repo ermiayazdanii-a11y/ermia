@@ -1,127 +1,299 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  animate,
+  MotionValue,
   motion,
+  useMotionTemplate,
   useMotionValue,
   useReducedMotion,
   useSpring,
+  useTransform,
 } from 'motion/react';
 import {
   MOTION_EASE,
   MOTION_TIMING,
+  PORTRAIT_CUTOUT_FALLBACK_PATH,
+  PORTRAIT_CUTOUT_PATH,
   PORTRAIT_IMAGE_PATH,
+  SPRING_CONFIG,
+  ThemeMode,
 } from '../styles/designTokens';
+import { HeroMonogram3D } from './HeroMonogram3D';
+import { KineticBrandTitle } from './KineticBrandTitle';
 
 interface HeroPortraitProps {
+  cutoutSrc?: string;
+  cutoutFallbackSrc?: string;
   src?: string;
   alt: string;
+  theme?: ThemeMode;
+  monogramAriaLabel?: string;
+  scrollProgress?: MotionValue<number>;
 }
 
 export function HeroPortrait({
+  cutoutSrc = PORTRAIT_CUTOUT_PATH,
+  cutoutFallbackSrc = PORTRAIT_CUTOUT_FALLBACK_PATH,
   src = PORTRAIT_IMAGE_PATH,
   alt,
+  theme = 'dark',
+  monogramAriaLabel = 'Interactive 3D ERMIA monogram — click or tap to tilt',
+  scrollProgress,
 }: HeroPortraitProps) {
-  const [imageMissing, setImageMissing] = useState(false);
+  const [fallbackStep, setFallbackStep] = useState<0 | 1 | 2 | 3>(0);
   const [isFineDesktop, setIsFineDesktop] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  const rawX = useMotionValue(0);
-  const rawY = useMotionValue(0);
-  const parallaxX = useSpring(rawX, { stiffness: 120, damping: 24 });
-  const parallaxY = useSpring(rawY, { stiffness: 120, damping: 24 });
+  const fallbackZero = useMotionValue(0);
+  const activeScroll = scrollProgress ?? fallbackZero;
+
+  // Synchronized scroll depth separation: background text drifts slightly down while foreground subject lifts
+  const textScrollY = useTransform(activeScroll, [0, 1], [0, 30]);
+  const subjectScrollY = useTransform(activeScroll, [0, 1], [0, -18]);
+  const haloScrollScale = useTransform(activeScroll, [0, 1], [1, 1.08]);
+
+  // Pointer-reactive multi-plane 3D parallax rig (fine desktop) + mobile tap impulse
+  const rawNormX = useMotionValue(0);
+  const rawNormY = useMotionValue(0);
+  const sheenX = useMotionValue(50);
+  const sheenY = useMotionValue(32);
+  const sheenOpacity = useMotionValue(0);
+  const tapScale = useMotionValue(1);
+
+  const smoothNormX = useSpring(rawNormX, SPRING_CONFIG.heroTilt);
+  const smoothNormY = useSpring(rawNormY, SPRING_CONFIG.heroTilt);
+  const smoothSheenOpacity = useSpring(
+    sheenOpacity,
+    SPRING_CONFIG.spotlightOpacity
+  );
+  const smoothTapScale = useSpring(tapScale, SPRING_CONFIG.magnetic);
+
+  const haloX = useTransform(smoothNormX, [-1, 1], [6, -6]);
+  const haloY = useTransform(smoothNormY, [-1, 1], [5, -5]);
+
+  const textX = useTransform(smoothNormX, [-1, 1], [13, -13]);
+  const textY = useTransform(smoothNormY, [-1, 1], [7, -7]);
+  const textRotateY = useTransform(smoothNormX, [-1, 1], [-2.5, 2.5]);
+  const textRotateX = useTransform(smoothNormY, [-1, 1], [2.2, -2.2]);
+
+  const fgX = useTransform(smoothNormX, [-1, 1], [-15, 15]);
+  const fgY = useTransform(smoothNormY, [-1, 1], [-9, 9]);
+  const fgRotateY = useTransform(smoothNormX, [-1, 1], [-5.2, 5.2]);
+  const fgRotateX = useTransform(smoothNormY, [-1, 1], [4.5, -4.5]);
+
+  const sheenBackground = useMotionTemplate`radial-gradient(380px circle at ${sheenX}% ${sheenY}%, rgba(var(--ermia-spotlight-rgb), 0.14), rgba(245, 166, 35, 0.08) 42%, transparent 72%)`;
 
   useEffect(() => {
-    setImageMissing(false);
-  }, [src]);
+    setFallbackStep(0);
+  }, [cutoutSrc, cutoutFallbackSrc, src]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || prefersReducedMotion) {
       setIsFineDesktop(false);
       return;
     }
-    const pointerQuery = window.matchMedia('(pointer: fine) and (min-width: 768px)');
+    const pointerQuery = window.matchMedia(
+      '(pointer: fine) and (min-width: 768px)'
+    );
     const update = () => setIsFineDesktop(pointerQuery.matches);
     update();
     pointerQuery.addEventListener('change', update);
     return () => pointerQuery.removeEventListener('change', update);
   }, [prefersReducedMotion]);
 
+  const activeImageSrc =
+    fallbackStep === 0
+      ? cutoutSrc
+      : fallbackStep === 1
+        ? cutoutFallbackSrc
+        : src;
+  const isTransparentCutout = fallbackStep < 2;
+
+  const handleImageError = () => {
+    setFallbackStep((prev) => (prev < 3 ? ((prev + 1) as 0 | 1 | 2 | 3) : 3));
+  };
+
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isFineDesktop || prefersReducedMotion) return;
-    const rect = containerRef.current?.getBoundingClientRect();
+    if (
+      !isFineDesktop ||
+      prefersReducedMotion ||
+      (e.pointerType && e.pointerType !== 'mouse' && e.pointerType !== 'pen')
+    ) {
+      return;
+    }
+    const rect = stageRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const normX = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
-    const normY = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-    rawX.set(Math.max(-1, Math.min(1, normX)) * -6);
-    rawY.set(Math.max(-1, Math.min(1, normY)) * -5);
+    const normX = Math.max(
+      -1,
+      Math.min(1, (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2))
+    );
+    const normY = Math.max(
+      -1,
+      Math.min(1, (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2))
+    );
+    rawNormX.set(normX);
+    rawNormY.set(normY);
+    sheenX.set(((e.clientX - rect.left) / rect.width) * 100);
+    sheenY.set(((e.clientY - rect.top) / rect.height) * 100);
+    sheenOpacity.set(1);
   };
 
   const handlePointerLeave = () => {
-    rawX.set(0);
-    rawY.set(0);
+    rawNormX.set(0);
+    rawNormY.set(0);
+    sheenOpacity.set(0);
   };
+
+  // Tactile mobile tap impulse giving responsive 3D depth without clutter
+  const handleStageTap = () => {
+    if (isFineDesktop || prefersReducedMotion) return;
+    animate(tapScale, [1, 1.03, 1], {
+      duration: 0.48,
+      ease: MOTION_EASE.cinematic,
+    });
+    animate(rawNormY, [0, -0.35, 0], {
+      duration: 0.48,
+      ease: MOTION_EASE.cinematic,
+    });
+  };
+
+  const isDark = theme === 'dark';
 
   return (
     <div
-      ref={containerRef}
+      ref={stageRef}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
-      className="relative mx-auto flex w-full max-w-[270px] items-center justify-center sm:max-w-[310px] lg:max-w-[340px]"
+      onClick={handleStageTap}
+      className="perspective-stage relative mx-auto flex h-[238px] w-full max-w-4xl items-end justify-center overflow-visible border-b border-[var(--ermia-border)] px-2 sm:h-[312px] lg:h-[364px]"
     >
-      {/* Subtle dual-theme atmospheric accent aura behind the portrait */}
-      <div
+      {/* Layer 0: Architectural Frame Backplate & Photographic Studio Lighting */}
+      <motion.div
         aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-8 top-4 bottom-6 -z-10 rounded-full opacity-90 blur-2xl"
-        style={{
-          background:
-            'radial-gradient(ellipse at 50% 44%, rgba(var(--ermia-spotlight-rgb), 0.22) 0%, rgba(var(--ermia-spotlight-rgb), 0.06) 46%, transparent 74%)',
-        }}
-      />
+        style={
+          prefersReducedMotion
+            ? undefined
+            : {
+                x: isFineDesktop ? haloX : 0,
+                y: isFineDesktop ? haloY : 0,
+                scale: haloScrollScale,
+              }
+        }
+        initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.94 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.95, ease: MOTION_EASE.cinematic }}
+        className="pointer-events-none absolute inset-x-4 top-2 bottom-0 -z-10 overflow-hidden rounded-t-[28px] border-x border-t border-[var(--ermia-border)]/70 will-change-transform sm:inset-x-8"
+      >
+        {/* Subtle studio vignette surface */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: isDark
+              ? 'radial-gradient(ellipse 72% 78% at 50% 42%, rgba(23, 27, 22, 0.72) 0%, rgba(9, 12, 9, 0.18) 65%, transparent 100%)'
+              : 'radial-gradient(ellipse 72% 78% at 50% 42%, rgba(255, 255, 255, 0.78) 0%, rgba(234, 237, 223, 0.25) 65%, transparent 100%)',
+          }}
+        />
 
-      {/* Editorial vertical crop keeping Ermia's natural appearance and colors intact */}
+        {/* Warm solar-amber rim light echoing the sun reflection inside Ermia's sunglasses */}
+        <div
+          className="animate-ambient-a absolute left-1/2 top-[12%] h-[220px] w-[260px] -translate-x-1/2 rounded-full blur-2xl sm:h-[290px] sm:w-[360px]"
+          style={{
+            background: isDark
+              ? 'radial-gradient(circle at 58% 36%, rgba(245, 166, 35, 0.16) 0%, rgba(var(--ermia-spotlight-rgb), 0.19) 42%, transparent 74%)'
+              : 'radial-gradient(circle at 58% 36%, rgba(245, 166, 35, 0.12) 0%, rgba(var(--ermia-spotlight-rgb), 0.14) 44%, transparent 76%)',
+          }}
+        />
+
+        {/* Precision camera-aperture ring framing the portrait depth */}
+        <div className="absolute left-1/2 top-[48%] h-[196px] w-[196px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--ermia-border)]/80 sm:h-[268px] sm:w-[268px] lg:h-[316px] lg:w-[316px]" />
+      </motion.div>
+
+      {/* Layer 1 (z-10): Oversized Readable HTML ERMIA Typography BEHIND the Subject */}
+      <motion.div
+        style={
+          prefersReducedMotion
+            ? undefined
+            : {
+                x: isFineDesktop ? textX : 0,
+                y: textScrollY,
+                translateY: isFineDesktop ? textY : 0,
+                rotateX: isFineDesktop ? textRotateX : 0,
+                rotateY: isFineDesktop ? textRotateY : 0,
+                transformStyle: 'preserve-3d',
+              }
+        }
+        className="pointer-events-none absolute inset-x-0 top-[46%] z-10 flex -translate-y-1/2 items-center justify-center will-change-transform sm:top-[44%]"
+      >
+        <KineticBrandTitle
+          variant="behindSubject"
+          delay={0.06}
+          scrollProgress={activeScroll}
+        />
+      </motion.div>
+
+      {/* Layer 2 (z-20): Transparent Foreground Portrait Subject Overlapping Center Typography */}
       <motion.div
         initial={
           prefersReducedMotion
             ? false
             : {
                 opacity: 0,
-                scale: 1.045,
-                clipPath: 'inset(10% 6% 14% 6% round 24px)',
-                filter: 'blur(8px)',
+                scale: 1.07,
+                y: 26,
+                clipPath: 'inset(14% 0% 100% 0%)',
+                filter: 'blur(6px)',
               }
         }
         animate={{
           opacity: 1,
           scale: 1,
-          clipPath: 'inset(0% 0% 0% 0% round 24px)',
+          y: 0,
+          clipPath: 'inset(0% 0% 0% 0%)',
           filter: 'blur(0px)',
         }}
         transition={{
           duration: MOTION_TIMING.cinematic + 0.12,
+          delay: 0.12,
           ease: MOTION_EASE.cinematic,
         }}
         style={
-          isFineDesktop && !prefersReducedMotion
-            ? { x: parallaxX, y: parallaxY }
-            : undefined
+          prefersReducedMotion
+            ? undefined
+            : {
+                x: isFineDesktop ? fgX : 0,
+                y: subjectScrollY,
+                translateY: isFineDesktop ? fgY : 0,
+                rotateX: isFineDesktop ? fgRotateX : 0,
+                rotateY: isFineDesktop ? fgRotateY : 0,
+                scale: smoothTapScale,
+                transformStyle: 'preserve-3d',
+              }
         }
-        className="relative aspect-[4/5] w-full overflow-hidden rounded-[24px] border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)] shadow-[0_24px_60px_-24px_rgba(0,0,0,0.55)] will-change-transform"
+        className="relative z-20 flex h-[222px] w-[222px] items-end justify-center will-change-transform sm:h-[292px] sm:w-[292px] lg:h-[346px] lg:w-[346px]"
       >
-        {!imageMissing ? (
+        {fallbackStep < 3 ? (
           <img
-            src={src}
+            src={activeImageSrc}
             alt={alt}
+            width={1254}
+            height={1254}
             loading="eager"
             decoding="async"
+            fetchPriority="high"
             referrerPolicy="no-referrer"
-            onError={() => setImageMissing(true)}
-            className="h-full w-full object-cover object-[50%_38%]"
+            onError={handleImageError}
+            className={
+              isTransparentCutout
+                ? 'h-full w-full select-none object-contain object-bottom drop-shadow-[0_26px_42px_rgba(0,0,0,0.52)]'
+                : 'h-[92%] w-[86%] select-none rounded-[36px] border border-[var(--ermia-border-strong)] object-cover object-[50%_35%] shadow-[0_26px_48px_-18px_rgba(0,0,0,0.65)]'
+            }
           />
         ) : (
           <div
             role="img"
             aria-label={alt}
-            className="flex h-full w-full flex-col items-center justify-center bg-[var(--ermia-bg-secondary)] p-6 text-center"
+            className="flex h-[85%] w-[85%] items-center justify-center rounded-3xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]"
           >
             <span className="font-display text-lg font-semibold tracking-[0.2em] text-[var(--ermia-text)]">
               ERMIA
@@ -129,12 +301,29 @@ export function HeroPortrait({
           </div>
         )}
 
-        {/* Delicate bottom edge fade leaving the entire face & hair accessories unobstructed */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-20 bg-gradient-to-t from-[var(--ermia-bg)]/85 via-[var(--ermia-bg)]/25 to-transparent"
-        />
+        {/* Fine-pointer cursor rim sheen across subject contour */}
+        {isFineDesktop && !prefersReducedMotion && (
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-full mix-blend-screen"
+            style={{
+              background: sheenBackground,
+              opacity: smoothSheenOpacity,
+            }}
+          />
+        )}
       </motion.div>
+
+      {/* Atmospheric Plinth Mist grounding bottom edge cleanly against baseline divider */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-10 bg-gradient-to-t from-[var(--ermia-bg)] via-[var(--ermia-bg)]/55 to-transparent sm:h-12"
+      />
+
+      {/* Layer 3 (z-30): Restrained Balanced 3D Liquid Glass & Brushed Chrome Monogram */}
+      <div className="absolute end-3 bottom-3 z-30 sm:end-10 sm:bottom-5">
+        <HeroMonogram3D theme={theme} ariaLabel={monogramAriaLabel} />
+      </div>
     </div>
   );
 }

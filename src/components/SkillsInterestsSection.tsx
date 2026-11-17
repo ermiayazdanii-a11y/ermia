@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ErmiaLocaleContent, Locale, SkillGroup } from '../data/ermiaData';
 import { MOTION_EASE, SPRING_CONFIG, ThemeMode } from '../styles/designTokens';
@@ -20,6 +20,7 @@ export function SkillsInterestsSection({
   const [selectedGroup, setSelectedGroup] = useState<'all' | SkillGroup['id']>(
     'all'
   );
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const prefersReducedMotion = useReducedMotion();
 
   const visibleGroups =
@@ -32,10 +33,37 @@ export function SkillsInterestsSection({
     ...content.groups.map((g) => ({ id: g.id, label: g.title })),
   ];
 
+  const handleTabKeyDown = (
+    e: React.KeyboardEvent<HTMLButtonElement>,
+    idx: number
+  ) => {
+    const isRtl = locale === 'fa';
+    let nextIdx: number | null = null;
+    if (e.key === 'ArrowRight') {
+      nextIdx = isRtl
+        ? (idx - 1 + filterTabs.length) % filterTabs.length
+        : (idx + 1) % filterTabs.length;
+    } else if (e.key === 'ArrowLeft') {
+      nextIdx = isRtl
+        ? (idx + 1) % filterTabs.length
+        : (idx - 1 + filterTabs.length) % filterTabs.length;
+    } else if (e.key === 'Home') {
+      nextIdx = 0;
+    } else if (e.key === 'End') {
+      nextIdx = filterTabs.length - 1;
+    }
+    if (nextIdx !== null) {
+      e.preventDefault();
+      const target = filterTabs[nextIdx];
+      tabRefs.current[target.id]?.focus();
+      setSelectedGroup(target.id);
+    }
+  };
+
   return (
     <section
       id="skills"
-      className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28"
+      className="scroll-mt-24 mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28"
     >
       <ScrollReveal className="flex flex-col justify-between gap-6 border-b border-[var(--ermia-border)] pb-8 lg:flex-row lg:items-end">
         <div className="max-w-2xl">
@@ -50,6 +78,7 @@ export function SkillsInterestsSection({
           </div>
           <TextReveal
             as="h2"
+            splitWords
             className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
           >
             {content.title}
@@ -65,16 +94,23 @@ export function SkillsInterestsSection({
           aria-label={content.kicker}
           className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)] p-1.5"
         >
-          {filterTabs.map((tab) => {
+          {filterTabs.map((tab, idx) => {
             const isSelected = selectedGroup === tab.id;
             return (
               <button
                 key={tab.id}
+                id={`skills-tab-${tab.id}`}
+                ref={(el) => {
+                  tabRefs.current[tab.id] = el;
+                }}
                 role="tab"
                 type="button"
+                tabIndex={isSelected ? 0 : -1}
                 aria-selected={isSelected}
+                aria-controls="skills-tabpanel"
                 onClick={() => setSelectedGroup(tab.id)}
-                className={`relative min-h-[36px] rounded-lg px-3.5 py-1.5 text-xs font-medium whitespace-nowrap shrink-0 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer ${
+                onKeyDown={(e) => handleTabKeyDown(e, idx)}
+                className={`relative min-h-[40px] rounded-lg px-3.5 py-1.5 text-xs font-medium whitespace-nowrap shrink-0 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer ${
                   isSelected
                     ? 'text-[var(--ermia-accent-contrast)]'
                     : 'text-[var(--ermia-text-secondary)] hover:text-[var(--ermia-text)]'
@@ -98,6 +134,9 @@ export function SkillsInterestsSection({
       {/* Structured 3-Column Distinction */}
       <AnimatePresence mode="wait">
         <motion.div
+          id="skills-tabpanel"
+          role="tabpanel"
+          aria-labelledby={`skills-tab-${selectedGroup}`}
           key={selectedGroup}
           initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

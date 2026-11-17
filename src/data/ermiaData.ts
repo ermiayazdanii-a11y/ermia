@@ -1,4 +1,8 @@
-import { PORTRAIT_IMAGE_PATH } from '../styles/designTokens';
+import {
+  PORTRAIT_CUTOUT_FALLBACK_PATH,
+  PORTRAIT_CUTOUT_PATH,
+  PORTRAIT_IMAGE_PATH,
+} from '../styles/designTokens';
 
 export type Locale = 'en' | 'fa';
 
@@ -94,6 +98,7 @@ export interface ErmiaLocaleContent {
     about: string;
     journey: string;
     projects: string;
+    skills: string;
     journal: string;
     contact: string;
     toggleLangLabel: string;
@@ -102,6 +107,7 @@ export interface ErmiaLocaleContent {
   };
   hero: {
     kicker: string;
+    fullName: string;
     headline: string;
     intro: string;
     journeyCta: string;
@@ -129,6 +135,8 @@ export interface ErmiaLocaleContent {
     title: string;
     subtitle: string;
     jumpLabel: string;
+    allMilestonesLabel: string;
+    turningPointsLabel: string;
     startLabel: string;
     highlightBadge: string;
     whyItMattersLabel: string;
@@ -158,6 +166,8 @@ export interface ErmiaLocaleContent {
     galleryLabel: string;
     galleryEmptyTitle: string;
     galleryEmptyBody: string;
+    conceptPreviewLabel: string;
+    conceptLayerHint: string;
     stageLabels: {
       implemented: string;
       planned: string;
@@ -231,6 +241,8 @@ export interface ErmiaLocaleContent {
 
 export const MEDIA_ASSETS = {
   portrait: PORTRAIT_IMAGE_PATH,
+  portraitCutout: PORTRAIT_CUTOUT_PATH,
+  portraitCutoutFallback: PORTRAIT_CUTOUT_FALLBACK_PATH,
 };
 
 export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
@@ -240,6 +252,7 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       about: 'About',
       journey: 'My Journey',
       projects: 'Projects',
+      skills: 'Skills',
       journal: 'Journal',
       contact: 'Contact',
       toggleLangLabel: 'فارسی',
@@ -247,13 +260,14 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       themeDarkLabel: 'Switch to dark theme',
     },
     hero: {
-      kicker: 'Personal Digital Space · ERMIA',
-      headline: 'Ideas become reality.',
+      kicker: 'Personal Portfolio · ERMIA',
+      fullName: 'Ermia Yazdani',
+      headline: 'Ideas Become Reality',
       intro:
-        'Exploring technology, programming and the art of building things.',
+        "Welcome to my personal portfolio. I'm Ermia Yazdani. This website is where I share my projects, creative interests, and learning journey.",
       journeyCta: 'Read My Journey',
       projectsCta: 'Explore FLOW',
-      portraitAlt: 'Stylized portrait of Ermia',
+      portraitAlt: 'Stylized portrait of Ermia Yazdani',
       marqueeItems: [
         'BUILDING',
         'LEARNING',
@@ -305,6 +319,8 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       subtitle:
         'A chronological, editable record of how my interests in music, technology, failed experiments, and programming came together. Jump to any period below.',
       jumpLabel: 'Jump to period',
+      allMilestonesLabel: 'All Milestones',
+      turningPointsLabel: 'Turning Points',
       startLabel: 'Follow the timeline from the beginning',
       highlightBadge: 'Turning Point',
       whyItMattersLabel: 'Why this matters',
@@ -421,6 +437,8 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       galleryEmptyTitle: 'Screenshots Pending Upload',
       galleryEmptyBody:
         'No real FLOW application screenshots have been provided yet. Authentic captures will appear in this interactive gallery once attached—no fabricated UI screenshots are shown here.',
+      conceptPreviewLabel: 'FLOW · Interactive Concept Preview (Unreleased)',
+      conceptLayerHint: 'Select any layer to inspect its daily role.',
       stageLabels: {
         implemented: 'Implemented',
         planned: 'Planned',
@@ -753,6 +771,7 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       about: 'درباره من',
       journey: 'مسیر من',
       projects: 'پروژه‌ها',
+      skills: 'مهارت‌ها',
       journal: 'ژورنال',
       contact: 'تماس',
       toggleLangLabel: 'EN',
@@ -760,12 +779,14 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       themeDarkLabel: 'تغییر به حالت تیره',
     },
     hero: {
-      kicker: 'فضای دیجیتال شخصی · ERMIA',
+      kicker: 'پورتفولیوی شخصی · ERMIA',
+      fullName: 'ارمیا یزدانی',
       headline: 'ایده‌ها به واقعیت تبدیل می‌شوند.',
-      intro: 'کاوش در دنیای فناوری، برنامه‌نویسی و هنرِ ساختن.',
+      intro:
+        'به پورتفولیوی شخصی من خوش آمدید. من ارمیا یزدانی هستم. اینجا جایی است که پروژه‌ها، علایق خلاقانه و مسیر یادگیری خودم را به اشتراک می‌گذارم.',
       journeyCta: 'مشاهده مسیر من',
       projectsCta: 'آشنایی با FLOW',
-      portraitAlt: 'پرتره استایل‌شده ارمیا',
+      portraitAlt: 'پرتره استایل‌شده ارمیا یزدانی',
       marqueeItems: [
         'ساختن',
         'یادگیری',
@@ -817,6 +838,8 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       subtitle:
         'روایتی زمانی و قابل ویرایش از اینکه چگونه علاقه به موسیقی، تجربه‌های ناموفق اولیه و یادگیری برنامه‌نویسی کنار هم قرار گرفتند.',
       jumpLabel: 'پرش به دوره',
+      allMilestonesLabel: 'همه مراحل',
+      turningPointsLabel: 'نقاط عطف',
       startLabel: 'مسیر را از ابتدا دنبال کنید',
       highlightBadge: 'نقطه عطف',
       whyItMattersLabel: 'چرا این مرحله مهم است',
@@ -933,6 +956,8 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       galleryEmptyTitle: 'اسکرین‌شات‌ها هنوز پیوست نشده‌اند',
       galleryEmptyBody:
         'تا این لحظه تصویر واقعی از محیط برنامه FLOW پیوست نشده است. به‌محض افزوده شدن اسکرین‌شات‌های واقعی، این گالری آن‌ها را نمایش خواهد داد—از تصاویر ساختگی استفاده نشده است.',
+      conceptPreviewLabel: 'FLOW · پیش‌نمایش تعاملی مفهوم (منتشرنشده)',
+      conceptLayerHint: 'روی هر لایه کلیک کنید تا نقش روزانه آن را ببینید.',
       stageLabels: {
         implemented: 'پیاده‌سازی‌شده',
         planned: 'برنامه‌ریزی‌شده',

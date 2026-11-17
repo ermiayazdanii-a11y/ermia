@@ -44,10 +44,10 @@ export function InteractiveProjectCard({
       typeof document !== 'undefined' &&
       !document.documentElement.classList.contains('dark'));
 
-  const radialHighlight = useMotionTemplate`radial-gradient(400px circle at ${mouseX}px ${mouseY}px, ${
+  const radialHighlight = useMotionTemplate`radial-gradient(420px circle at ${mouseX}px ${mouseY}px, ${
     isLight
-      ? 'rgba(83, 106, 0, 0.085), rgba(83, 106, 0, 0.025) 45%, transparent 72%'
-      : 'rgba(216, 241, 90, 0.14), rgba(137, 145, 123, 0.045) 44%, transparent 72%'
+      ? 'rgba(83, 106, 0, 0.095), rgba(83, 106, 0, 0.025) 45%, transparent 72%'
+      : 'rgba(216, 241, 90, 0.15), rgba(137, 145, 123, 0.045) 44%, transparent 72%'
   })`;
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -69,8 +69,8 @@ export function InteractiveProjectCard({
     if (enableTilt) {
       const normalizedX = (localX / rect.width - 0.5) * 2;
       const normalizedY = (localY / rect.height - 0.5) * 2;
-      rotateYRaw.set(normalizedX * 2.5);
-      rotateXRaw.set(-normalizedY * 2.5);
+      rotateYRaw.set(normalizedX * 2.75);
+      rotateXRaw.set(-normalizedY * 2.75);
     }
   };
 
@@ -100,9 +100,16 @@ export function InteractiveProjectCard({
               }
         }
         whileHover={prefersReducedMotion ? undefined : { y: -2 }}
+        whileTap={prefersReducedMotion ? undefined : { scale: 0.996 }}
         transition={{ duration: 0.2, ease: MOTION_EASE.cinematic }}
         className={`group relative overflow-hidden rounded-2xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)]/95 transition-colors duration-200 hover:border-[var(--ermia-accent)]/45 ${className}`}
       >
+        {/* Subtle top inner glass specular highlight */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-[var(--ermia-glass-edge)] to-transparent"
+        />
+
         {/* Cursor-reactive surface illumination */}
         {!prefersReducedMotion && (
           <motion.div

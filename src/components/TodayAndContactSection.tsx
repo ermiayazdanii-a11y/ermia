@@ -104,6 +104,7 @@ export function TodayAndContactSection({
     { id: 'about', label: navContent.about },
     { id: 'journey', label: navContent.journey },
     { id: 'projects', label: navContent.projects },
+    { id: 'skills', label: navContent.skills },
     { id: 'journal', label: navContent.journal },
     { id: 'contact', label: navContent.contact },
   ];
@@ -113,7 +114,7 @@ export function TodayAndContactSection({
       {/* Closing "Today & What's Next" Section */}
       <section
         id="today"
-        className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28"
+        className="mx-auto max-w-6xl scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28"
       >
         <ScrollReveal>
           <InteractiveProjectCard
@@ -133,6 +134,7 @@ export function TodayAndContactSection({
               </div>
               <TextReveal
                 as="h2"
+                splitWords
                 className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
               >
                 {todayContent.title}
@@ -164,7 +166,7 @@ export function TodayAndContactSection({
       {/* Contact & Brand Signature Footer */}
       <footer
         id="contact"
-        className="border-t border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/85 pt-20 pb-12 sm:pt-24"
+        className="scroll-mt-24 border-t border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/85 pt-20 pb-12 sm:pt-24"
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
@@ -181,6 +183,7 @@ export function TodayAndContactSection({
               </div>
               <TextReveal
                 as="h2"
+                splitWords
                 className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
               >
                 {contactContent.title}
@@ -297,6 +300,8 @@ export function TodayAndContactSection({
                         id="contact-name"
                         type="text"
                         value={name}
+                        aria-invalid={Boolean(validationError && !name.trim())}
+                        aria-describedby={validationError ? 'contact-form-error' : undefined}
                         onChange={(e) => setName(e.target.value)}
                         placeholder={contactContent.namePlaceholder}
                         className="mt-2 w-full rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg)] px-4 py-3 text-sm text-[var(--ermia-text)] placeholder-[var(--ermia-muted)]/75 transition-colors focus:border-[var(--ermia-accent)] focus:outline-none"
@@ -314,6 +319,10 @@ export function TodayAndContactSection({
                         type="email"
                         dir="ltr"
                         value={email}
+                        aria-invalid={Boolean(
+                          validationError && (!email.trim() || !EMAIL_PATTERN.test(email.trim()))
+                        )}
+                        aria-describedby={validationError ? 'contact-form-error' : undefined}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={contactContent.senderEmailPlaceholder}
                         className="mt-2 w-full rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg)] px-4 py-3 text-sm text-[var(--ermia-text)] placeholder-[var(--ermia-muted)]/75 transition-colors focus:border-[var(--ermia-accent)] focus:outline-none"
@@ -357,6 +366,8 @@ export function TodayAndContactSection({
                       id="contact-message"
                       rows={4}
                       value={message}
+                      aria-invalid={Boolean(validationError && !message.trim())}
+                      aria-describedby={validationError ? 'contact-form-error' : undefined}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder={contactContent.messagePlaceholder}
                       className="mt-2 w-full resize-y rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg)] px-4 py-3 text-sm text-[var(--ermia-text)] placeholder-[var(--ermia-muted)]/75 transition-colors focus:border-[var(--ermia-accent)] focus:outline-none"
@@ -364,7 +375,11 @@ export function TodayAndContactSection({
                   </div>
 
                   {validationError && (
-                    <p role="alert" className="text-xs font-medium text-red-500">
+                    <p
+                      id="contact-form-error"
+                      role="alert"
+                      className="text-xs font-medium text-red-600 dark:text-red-400"
+                    >
                       {validationError}
                     </p>
                   )}

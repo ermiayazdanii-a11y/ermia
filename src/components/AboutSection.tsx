@@ -22,7 +22,7 @@ export function AboutSection({ locale, content }: AboutSectionProps) {
   return (
     <section
       id="about"
-      className="bg-[var(--ermia-bg-secondary)]/70 py-20 sm:py-28"
+      className="scroll-mt-24 bg-[var(--ermia-bg-secondary)]/70 py-20 sm:py-28"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <ScrollReveal className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
@@ -38,6 +38,8 @@ export function AboutSection({ locale, content }: AboutSectionProps) {
             </div>
             <TextReveal
               as="h2"
+              splitWords
+              scrollKinetic
               className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
             >
               {content.title}
@@ -51,7 +53,7 @@ export function AboutSection({ locale, content }: AboutSectionProps) {
             href={SITE_CONFIG.githubUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-[42px] items-center gap-2.5 self-start rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)] px-4 py-2 text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 transition-colors duration-150 hover:border-[var(--ermia-accent)] hover:text-[var(--ermia-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] lg:self-end"
+            className="inline-flex min-h-[44px] items-center gap-2.5 self-start rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)] px-4 py-2 text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 transition-colors duration-150 hover:border-[var(--ermia-accent)] hover:text-[var(--ermia-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] lg:self-end"
           >
             <Github className="h-4 w-4 text-[var(--ermia-accent)]" strokeWidth={1.75} />
             <span>{content.githubCtaLabel}</span>
@@ -76,6 +78,10 @@ export function AboutSection({ locale, content }: AboutSectionProps) {
               variants={prefersReducedMotion ? undefined : staggerItemVariants}
               className="group relative flex flex-col justify-between bg-[var(--ermia-surface)] p-6 transition-colors duration-200 hover:bg-[var(--ermia-bg-secondary)] sm:p-8"
             >
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] origin-left scale-x-0 bg-[var(--ermia-accent)]/75 transition-transform duration-300 ease-out group-hover:scale-x-100 rtl:origin-right"
+              />
               <div>
                 <span className="font-mono text-xs tabular-nums text-[var(--ermia-accent)]">
                   {pillar.index}

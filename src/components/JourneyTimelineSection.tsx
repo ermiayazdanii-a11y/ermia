@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpLeft, ArrowUpRight, Layers, Sparkles } from 'lucide-react';
 import {
   motion,
@@ -35,9 +35,28 @@ export function JourneyTimelineSection({
   const [activeMilestoneId, setActiveMilestoneId] = useState<string>(
     content.milestones[0]?.id ?? ''
   );
+  const [showHighlightsOnly, setShowHighlightsOnly] = useState(false);
   const milestoneRefs = useRef<Record<string, HTMLElement | null>>({});
+  const periodNavRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const timelineContainerRef = useRef<HTMLDivElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  const displayedMilestones = useMemo(
+    () =>
+      showHighlightsOnly
+        ? content.milestones.filter((m) => m.importance === 'highlight')
+        : content.milestones,
+    [content.milestones, showHighlightsOnly]
+  );
+
+  useEffect(() => {
+    if (displayedMilestones.length === 0) return;
+    setActiveMilestoneId((curr) =>
+      displayedMilestones.some((m) => m.id === curr)
+        ? curr
+        : displayedMilestones[0].id
+    );
+  }, [displayedMilestones]);
 
   const { scrollYProgress } = useScroll({
     target: timelineContainerRef,
@@ -63,13 +82,27 @@ export function JourneyTimelineSection({
       }
     );
 
-    for (const milestone of content.milestones) {
+    for (const milestone of displayedMilestones) {
       const el = milestoneRefs.current[milestone.id];
       if (el) observer.observe(el);
     }
 
     return () => observer.disconnect();
-  }, [content.milestones]);
+  }, [displayedMilestones]);
+
+  const handleToggleFilter = () => {
+    const next = !showHighlightsOnly;
+    const nextMilestones = next
+      ? content.milestones.filter((m) => m.importance === 'highlight')
+      : content.milestones;
+    setShowHighlightsOnly(next);
+    if (
+      nextMilestones.length > 0 &&
+      !nextMilestones.some((m) => m.id === activeMilestoneId)
+    ) {
+      setActiveMilestoneId(nextMilestones[0].id);
+    }
+  };
 
   const jumpToMilestone = (milestoneId: string) => {
     setActiveMilestoneId(milestoneId);
@@ -79,6 +112,35 @@ export function JourneyTimelineSection({
       onScrollToElement(el);
     } else {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  const handlePeriodKeyDown = (
+    e: React.KeyboardEvent<HTMLButtonElement>,
+    idx: number
+  ) => {
+    const list = displayedMilestones;
+    if (list.length === 0) return;
+    const isRtl = locale === 'fa';
+    let nextIdx: number | null = null;
+    if (e.key === 'ArrowRight') {
+      nextIdx = isRtl
+        ? (idx - 1 + list.length) % list.length
+        : (idx + 1) % list.length;
+    } else if (e.key === 'ArrowLeft') {
+      nextIdx = isRtl
+        ? (idx + 1) % list.length
+        : (idx - 1 + list.length) % list.length;
+    } else if (e.key === 'Home') {
+      nextIdx = 0;
+    } else if (e.key === 'End') {
+      nextIdx = list.length - 1;
+    }
+    if (nextIdx !== null) {
+      e.preventDefault();
+      const next = list[nextIdx];
+      periodNavRefs.current[next.id]?.focus();
+      jumpToMilestone(next.id);
     }
   };
 
@@ -98,7 +160,7 @@ export function JourneyTimelineSection({
   return (
     <section
       id="journey"
-      className="border-t border-[var(--ermia-border)] mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28"
+      className="scroll-mt-24 border-t border-[var(--ermia-border)] mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28"
     >
       <ScrollReveal className="max-w-3xl">
         <div className="flex items-center gap-3 text-xs font-medium text-[var(--ermia-accent)]">
@@ -112,6 +174,8 @@ export function JourneyTimelineSection({
         </div>
         <TextReveal
           as="h2"
+          splitWords
+          scrollKinetic
           className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
         >
           {content.title}
@@ -121,28 +185,50 @@ export function JourneyTimelineSection({
         </p>
       </ScrollReveal>
 
-      {/* Horizontally Scrollable Period Navigation */}
+      {/* Horizontally Scrollable Period Navigation + Progressive Focus Toggle */}
       <div className="mt-10 rounded-2xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)]/90 p-3 backdrop-blur-md">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <span className="px-2 text-xs font-medium text-[var(--ermia-muted)] whitespace-nowrap shrink-0">
-            {content.jumpLabel}
-          </span>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+            <span className="text-xs font-medium text-[var(--ermia-muted)] whitespace-nowrap shrink-0">
+              {content.jumpLabel}
+            </span>
 
-          <div
-            role="tablist"
+            <button
+              type="button"
+              aria-pressed={showHighlightsOnly}
+              onClick={handleToggleFilter}
+              className={`inline-flex min-h-[34px] items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium whitespace-nowrap shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer ${
+                showHighlightsOnly
+                  ? 'border-[var(--ermia-accent)] bg-[var(--ermia-accent)]/12 text-[var(--ermia-accent)]'
+                  : 'border-[var(--ermia-border)] bg-[var(--ermia-bg)] text-[var(--ermia-text-secondary)] hover:text-[var(--ermia-text)]'
+              }`}
+            >
+              <Sparkles className="h-3.5 w-3.5" strokeWidth={1.75} />
+              <span>
+                {showHighlightsOnly
+                  ? content.turningPointsLabel
+                  : content.allMilestonesLabel}
+              </span>
+            </button>
+          </div>
+
+          <nav
             aria-label={content.jumpLabel}
-            className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0"
+            className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0"
           >
-            {content.milestones.map((m) => {
+            {displayedMilestones.map((m, idx) => {
               const isSelected = activeMilestoneId === m.id;
               return (
                 <button
                   key={m.id}
-                  role="tab"
+                  ref={(el) => {
+                    periodNavRefs.current[m.id] = el;
+                  }}
                   type="button"
-                  aria-selected={isSelected}
+                  aria-current={isSelected ? 'location' : undefined}
                   onClick={() => jumpToMilestone(m.id)}
-                  className={`relative inline-flex min-h-[38px] items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-medium whitespace-nowrap shrink-0 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer ${
+                  onKeyDown={(e) => handlePeriodKeyDown(e, idx)}
+                  className={`relative inline-flex min-h-[40px] items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-medium whitespace-nowrap shrink-0 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer ${
                     isSelected
                       ? 'text-[var(--ermia-accent-contrast)]'
                       : 'border border-[var(--ermia-border)] bg-[var(--ermia-bg)] text-[var(--ermia-text-secondary)] hover:border-[var(--ermia-border-strong)] hover:text-[var(--ermia-text)]'
@@ -163,7 +249,7 @@ export function JourneyTimelineSection({
                 </button>
               );
             })}
-          </div>
+          </nav>
         </div>
       </div>
 
@@ -207,7 +293,7 @@ export function JourneyTimelineSection({
         </div>
 
         <div className="space-y-12 lg:space-y-16">
-          {content.milestones.map((milestone: JourneyMilestone, idx: number) => {
+          {displayedMilestones.map((milestone: JourneyMilestone, idx: number) => {
             const isEven = idx % 2 === 0;
             const isActive = activeMilestoneId === milestone.id;
             const isHighlight = milestone.importance === 'highlight';
@@ -254,7 +340,9 @@ export function JourneyTimelineSection({
                           ? '1.25px var(--ermia-stroke-active)'
                           : '1px var(--ermia-stroke-inactive)',
                       }}
-                      className="font-display text-6xl font-bold tracking-tight text-transparent transition-all duration-300 xl:text-7xl"
+                      className={`font-display text-6xl font-bold tracking-tight text-transparent transition-all duration-300 xl:text-7xl ${
+                        isActive ? 'scale-[1.03]' : 'scale-100 opacity-75'
+                      }`}
                     >
                       {milestone.number}
                     </p>

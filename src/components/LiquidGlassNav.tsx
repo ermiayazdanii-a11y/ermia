@@ -50,10 +50,10 @@ export function LiquidGlassNav({
   );
 
   const isDark = theme === 'dark';
-  const glassGlow = useMotionTemplate`radial-gradient(260px circle at ${glassX}px ${glassY}px, ${
+  const glassGlow = useMotionTemplate`radial-gradient(280px circle at ${glassX}px ${glassY}px, ${
     isDark
-      ? 'rgba(216, 241, 90, 0.13), rgba(240, 241, 233, 0.035) 50%, transparent 76%'
-      : 'rgba(83, 106, 0, 0.1), rgba(23, 27, 20, 0.03) 50%, transparent 76%'
+      ? 'rgba(216, 241, 90, 0.14), rgba(240, 241, 233, 0.04) 48%, transparent 76%'
+      : 'rgba(83, 106, 0, 0.11), rgba(23, 27, 20, 0.03) 48%, transparent 76%'
   })`;
 
   useEffect(() => {
@@ -79,6 +79,7 @@ export function LiquidGlassNav({
     { id: 'about', label: content.about },
     { id: 'journey', label: content.journey },
     { id: 'projects', label: content.projects },
+    { id: 'skills', label: content.skills },
     { id: 'journal', label: content.journal },
     { id: 'contact', label: content.contact },
   ];
@@ -107,12 +108,17 @@ export function LiquidGlassNav({
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 px-4 pt-3 sm:px-6 sm:pt-3.5">
+    <motion.header
+      initial={prefersReducedMotion ? false : { opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.62, ease: MOTION_EASE.cinematic }}
+      className="fixed inset-x-0 top-0 z-40 px-3 pt-[max(0.625rem,env(safe-area-inset-top))] sm:px-6 sm:pt-3.5"
+    >
       <div
         ref={barRef}
         onPointerMove={handleGlassMove}
         onPointerLeave={handleGlassLeave}
-        className={`relative mx-auto flex max-w-5xl items-center justify-between gap-4 overflow-hidden rounded-2xl px-4 py-2 transition-all duration-300 sm:gap-8 sm:px-5 ${
+        className={`relative mx-auto flex max-w-5xl items-center justify-between gap-3 overflow-hidden rounded-2xl px-3.5 py-2 transition-all duration-300 sm:gap-8 sm:px-5 ${
           isScrolled ? 'liquid-glass-scrolled' : 'liquid-glass'
         }`}
       >
@@ -129,6 +135,7 @@ export function LiquidGlassNav({
         <a
           href="#home"
           aria-label={`${content.home} — ERMIA`}
+          aria-current={activeSection === 'home' ? 'location' : undefined}
           onClick={(e) => {
             e.preventDefault();
             handleLinkClick('home');
@@ -141,7 +148,7 @@ export function LiquidGlassNav({
         {/* Zone 2: Concise Single-Line Section Links */}
         <nav
           aria-label="Primary Navigation"
-          className="relative z-10 hidden items-center gap-6 lg:flex"
+          className="relative z-10 hidden items-center gap-4 lg:flex xl:gap-6"
         >
           {navItems.map((item) => {
             const isActive = activeSection === item.id;
@@ -149,11 +156,12 @@ export function LiquidGlassNav({
               <a
                 key={item.id}
                 href={`#${item.id}`}
+                aria-current={isActive ? 'location' : undefined}
                 onClick={(e) => {
                   e.preventDefault();
                   handleLinkClick(item.id);
                 }}
-                className={`relative py-1 text-[13px] font-medium whitespace-nowrap shrink-0 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] ${
+                className={`relative py-1.5 text-[13px] font-medium whitespace-nowrap shrink-0 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] ${
                   isActive
                     ? 'text-[var(--ermia-text)]'
                     : 'text-[var(--ermia-text-secondary)] hover:text-[var(--ermia-text)]'
@@ -174,13 +182,13 @@ export function LiquidGlassNav({
         </nav>
 
         {/* Zone 3: Theme Toggle + Language Switcher + Mobile Menu Toggle */}
-        <div className="relative z-10 flex items-center gap-2 shrink-0">
+        <div className="relative z-10 flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
             type="button"
             onClick={onToggleTheme}
             aria-label={isDark ? content.themeLightLabel : content.themeDarkLabel}
             title={isDark ? content.themeLightLabel : content.themeDarkLabel}
-            className="liquid-glass-control inline-flex h-9 w-9 items-center justify-center rounded-xl text-[var(--ermia-text)] transition-all duration-150 hover:border-[var(--ermia-accent)]/60 hover:text-[var(--ermia-accent)] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
+            className="liquid-glass-control inline-flex h-9 w-9 items-center justify-center rounded-xl text-[var(--ermia-text)] transition-all duration-150 hover:border-[var(--ermia-accent)]/60 hover:text-[var(--ermia-accent)] active:scale-[0.95] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
           >
             {isDark ? (
               <Sun className="h-4 w-4 text-[var(--ermia-accent)]" strokeWidth={1.75} />
@@ -195,7 +203,7 @@ export function LiquidGlassNav({
             aria-label={
               locale === 'en' ? 'Switch to Persian' : 'Switch to English'
             }
-            className="liquid-glass-control inline-flex min-h-[36px] items-center gap-1.5 rounded-xl px-3 py-1 text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 transition-all duration-150 hover:border-[var(--ermia-accent)]/60 hover:text-[var(--ermia-accent)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
+            className="liquid-glass-control inline-flex min-h-[36px] items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 transition-all duration-150 hover:border-[var(--ermia-accent)]/60 hover:text-[var(--ermia-accent)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] sm:px-3 cursor-pointer"
           >
             <Globe className="h-3.5 w-3.5 text-[var(--ermia-accent)]" strokeWidth={1.75} />
             <span>{content.toggleLangLabel}</span>
@@ -207,7 +215,7 @@ export function LiquidGlassNav({
             aria-label={mobileMenuOpen ? 'Close navigation' : 'Open navigation'}
             aria-expanded={mobileMenuOpen}
             onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)]/80 text-[var(--ermia-text)] transition-colors duration-150 hover:border-[var(--ermia-accent)]/55 hover:text-[var(--ermia-accent)] lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
+            className="liquid-glass-control inline-flex h-9 w-9 items-center justify-center rounded-xl text-[var(--ermia-text)] transition-colors duration-150 hover:border-[var(--ermia-accent)]/55 hover:text-[var(--ermia-accent)] active:scale-[0.95] lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
           >
             {mobileMenuOpen ? (
               <X className="h-4.5 w-4.5" strokeWidth={1.75} />
@@ -218,55 +226,61 @@ export function LiquidGlassNav({
         </div>
       </div>
 
-      {/* Animated Mobile Liquid Glass Drawer */}
+      {/* Animated Mobile Liquid Glass Drawer with Staggered Entrances */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={prefersReducedMotion ? undefined : { opacity: 0, y: -6 }}
-            transition={{ duration: 0.2, ease: MOTION_EASE.cinematic }}
-            className="liquid-glass-scrolled mx-auto mt-2 max-w-5xl rounded-2xl p-3.5 lg:hidden"
+            initial={
+              prefersReducedMotion
+                ? false
+                : { opacity: 0, y: -10, scale: 0.985 }
+            }
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={
+              prefersReducedMotion
+                ? undefined
+                : { opacity: 0, y: -8, scale: 0.985 }
+            }
+            transition={{ duration: 0.24, ease: MOTION_EASE.cinematic }}
+            className="liquid-glass-scrolled mx-auto mt-2 max-w-5xl rounded-2xl p-3 lg:hidden"
           >
             <nav aria-label="Mobile Navigation" className="flex flex-col gap-1">
-              <a
-                href="#home"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleLinkClick('home');
-                }}
-                className={`flex min-h-[44px] items-center rounded-xl px-3.5 py-2 text-sm font-medium transition-colors ${
-                  activeSection === 'home'
-                    ? 'bg-[var(--ermia-bg-secondary)] text-[var(--ermia-accent)]'
-                    : 'text-[var(--ermia-text)] hover:bg-[var(--ermia-bg-secondary)]/60'
-                }`}
-              >
-                {content.home}
-              </a>
-              {navItems.map((item) => {
-                const isActive = activeSection === item.id;
-                return (
-                  <a
-                    key={item.id}
-                    href={`#${item.id}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleLinkClick(item.id);
-                    }}
-                    className={`flex min-h-[44px] items-center rounded-xl px-3.5 py-2 text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-[var(--ermia-bg-secondary)] text-[var(--ermia-accent)]'
-                        : 'text-[var(--ermia-text)] hover:bg-[var(--ermia-bg-secondary)]/60'
-                    }`}
-                  >
-                    {item.label}
-                  </a>
-                );
-              })}
+              {[{ id: 'home', label: content.home }, ...navItems].map(
+                (item, idx) => {
+                  const isActive = activeSection === item.id;
+                  return (
+                    <motion.a
+                      key={item.id}
+                      href={`#${item.id}`}
+                      aria-current={isActive ? 'location' : undefined}
+                      initial={
+                        prefersReducedMotion ? false : { opacity: 0, x: -6 }
+                      }
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        duration: 0.22,
+                        delay: prefersReducedMotion ? 0 : idx * 0.035,
+                        ease: MOTION_EASE.cinematic,
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleLinkClick(item.id);
+                      }}
+                      className={`flex min-h-[44px] items-center rounded-xl px-3.5 py-2 text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'bg-[var(--ermia-bg-secondary)] text-[var(--ermia-accent)]'
+                          : 'text-[var(--ermia-text)] hover:bg-[var(--ermia-bg-secondary)]/60'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                    </motion.a>
+                  );
+                }
+              )}
             </nav>
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }
