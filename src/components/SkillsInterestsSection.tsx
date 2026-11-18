@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { ErmiaLocaleContent, Locale, SkillGroup } from '../data/ermiaData';
+import { useMotionProfile } from '../hooks/useMotionProfile';
 import { MOTION_EASE, SPRING_CONFIG, ThemeMode } from '../styles/designTokens';
 import { InteractiveProjectCard } from './InteractiveProjectCard';
 import { ScrollReveal } from './ScrollReveal';
@@ -21,7 +22,8 @@ export function SkillsInterestsSection({
     'all'
   );
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const prefersReducedMotion = useReducedMotion();
+  const { prefersReducedMotion, allow3DTilt, revealDurationMultiplier } =
+    useMotionProfile();
 
   const visibleGroups =
     selectedGroup === 'all'
@@ -78,7 +80,9 @@ export function SkillsInterestsSection({
           </div>
           <TextReveal
             as="h2"
+            locale={locale}
             splitWords
+            scrollKinetic
             className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
           >
             {content.title}
@@ -146,10 +150,20 @@ export function SkillsInterestsSection({
             visibleGroups.length === 1 ? 'lg:grid-cols-1' : 'lg:grid-cols-3'
           }`}
         >
-          {visibleGroups.map((group) => (
-            <div key={group.id}>
+          {visibleGroups.map((group, idx) => (
+            <motion.div
+              key={group.id}
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.44 * revealDurationMultiplier,
+                delay: prefersReducedMotion ? 0 : idx * 0.055,
+                ease: MOTION_EASE.cinematic,
+              }}
+            >
               <InteractiveProjectCard
-                enableTilt={false}
+                enableTilt={allow3DTilt}
+                tiltStrength="medium"
                 theme={theme}
                 className="flex h-full flex-col p-6 sm:p-7"
               >
@@ -180,7 +194,7 @@ export function SkillsInterestsSection({
                   ))}
                 </div>
               </InteractiveProjectCard>
-            </div>
+            </motion.div>
           ))}
         </motion.div>
       </AnimatePresence>

@@ -1,10 +1,10 @@
 import { ReactNode, useRef } from 'react';
 import {
   motion,
-  useReducedMotion,
   useScroll,
   useTransform,
 } from 'motion/react';
+import { useMotionProfile } from '../hooks/useMotionProfile';
 import { MOTION_EASE, REVEAL_VIEWPORT, ThemeMode } from '../styles/designTokens';
 import { InteractiveProjectCard } from './InteractiveProjectCard';
 
@@ -29,7 +29,8 @@ export function ProjectStackCard({
   children,
 }: ProjectStackCardProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const prefersReducedMotion = useReducedMotion();
+  const { prefersReducedMotion, allowParallax, allow3DTilt, revealDurationMultiplier } =
+    useMotionProfile();
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -37,8 +38,9 @@ export function ProjectStackCard({
   });
 
   const isLast = index === total - 1;
-  const targetScale = isLast ? 1 : 1 - (total - 1 - index) * 0.022;
+  const targetScale = isLast ? 1 : 1 - (total - 1 - index) * 0.024;
   const scale = useTransform(scrollYProgress, [0, 1], [1, targetScale]);
+  const rotateX = useTransform(scrollYProgress, [0, 1], [0, isLast ? 0 : -1.4]);
   const opacity = useTransform(
     scrollYProgress,
     [0, 0.85, 1],
@@ -52,28 +54,33 @@ export function ProjectStackCard({
       id={id}
       ref={containerRef}
       style={{ zIndex: 10 + index, top: `${stickyTopOffsetPx}px` }}
-      className="relative scroll-mt-24 lg:sticky"
+      className="perspective-stage relative scroll-mt-24 lg:sticky"
     >
       <motion.div
         initial={
-          prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.985 }
+          prefersReducedMotion ? false : { opacity: 0, y: 26, scale: 0.985 }
         }
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={REVEAL_VIEWPORT}
-        transition={{ duration: 0.65, ease: MOTION_EASE.cinematic }}
+        transition={{
+          duration: 0.65 * revealDurationMultiplier,
+          ease: MOTION_EASE.cinematic,
+        }}
         style={
-          prefersReducedMotion
-            ? undefined
-            : {
+          allowParallax
+            ? {
                 scale,
+                rotateX,
                 opacity,
               }
+            : undefined
         }
-        className="origin-top"
+        className="origin-top will-change-transform"
       >
         <InteractiveProjectCard
           theme={theme}
-          enableTilt={false}
+          enableTilt={allow3DTilt}
+          tiltStrength="subtle"
           className="shadow-[0_24px_64px_-28px_rgba(0,0,0,0.52)]"
         >
           {children}

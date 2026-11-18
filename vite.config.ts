@@ -26,6 +26,9 @@ export default defineConfig(({ isSsrBuild }) => {
                 if (id.includes('node_modules/lenis')) {
                   return 'vendor-lenis';
                 }
+                if (id.includes('node_modules/three')) {
+                  return 'vendor-three';
+                }
                 if (id.includes('node_modules/lucide-react')) {
                   return 'vendor-icons';
                 }

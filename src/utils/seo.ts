@@ -1,5 +1,10 @@
 import { buildAbsoluteUrl, SITE_CONFIG } from '../config/siteConfig';
+import {
+  FLOW_RELEASE_CONFIG,
+  resolveFlowDistributionAction,
+} from '../config/flowReleaseConfig';
 import type { Locale } from '../data/ermiaData';
+import { FLOW_MEDIA_ASSETS } from '../data/flowProductData';
 import type { AppRoute } from './routing';
 
 export interface SeoMetadata {
@@ -39,7 +44,14 @@ export function getSeoMetadata({
   const homeRootUrl = buildAbsoluteUrl('/', siteUrlOverride);
   const homeFaUrl = buildAbsoluteUrl('/fa/', siteUrlOverride);
   const flowUrl = buildAbsoluteUrl('/projects/flow', siteUrlOverride);
-  const ogImage = buildAbsoluteUrl(SITE_CONFIG.portraitPath, siteUrlOverride);
+  const portfolioOgImage = buildAbsoluteUrl(
+    SITE_CONFIG.portraitPath,
+    siteUrlOverride
+  );
+  const flowOgImage = buildAbsoluteUrl(
+    FLOW_MEDIA_ASSETS.icon.src,
+    siteUrlOverride
+  );
 
   const normalizedCanonicalPath =
     canonicalPath === '/en/' ? '/' : canonicalPath;
@@ -50,19 +62,20 @@ export function getSeoMetadata({
 
   const isFlow = route === 'flow';
   const isFa = locale === 'fa';
+  const ogImage = isFlow ? flowOgImage : portfolioOgImage;
 
   const title = isFlow
     ? isFa
-      ? 'FLOW — مطالعه موردی پروژه | ارمیا یزدانی (Ermia Yazdani)'
-      : 'FLOW — Personal Daily-Life App Case Study | Ermia Yazdani'
+      ? 'FLOW — اپلیکیشن اندروید «روز تو. فضای تو.» | ارمیا یزدانی'
+      : 'FLOW — "Your day. Your space." | Android App by Ermia Yazdani'
     : isFa
       ? HOME_TITLE_FA
       : HOME_TITLE_EN;
 
   const description = isFlow
     ? isFa
-      ? 'مطالعه موردی پروژه شخصی FLOW اثر ارمیا یزدانی؛ طراحی اپلیکیشن آرام زندگی روزمره، معماری سه‌لایه و مسیر یادگیری پایتون و HTML.'
-      : 'Explore the FLOW case study by Ermia Yazdani—a calm personal daily-life app in active development, shaped by Python study and HTML basics.'
+      ? 'آشنایی با اپلیکیشن اندروید FLOW اثر ارمیا یزدانی؛ تصاویر واقعی رابط کاربری، تایمر Focus Nebula، استودیوی تم و وضعیت انتشار.'
+      : 'Explore FLOW for Android by Ermia Yazdani—"Your day. Your space." View real app screenshots, Today dashboard, Focus Nebula, Living Space Studio, and honest release status.'
     : isFa
       ? HOME_DESC_FA
       : HOME_DESC_EN;
@@ -76,7 +89,7 @@ export function getSeoMetadata({
     name: SITE_CONFIG.fullName,
     alternateName: 'ERMIA',
     url: homeRootUrl,
-    image: ogImage,
+    image: portfolioOgImage,
     sameAs: [SITE_CONFIG.githubUrl],
     description: HOME_DESC_EN,
     knowsAbout: [
@@ -84,7 +97,7 @@ export function getSeoMetadata({
       'HTML Basics',
       'Python (Learning)',
       'Technology Experiments',
-      'FLOW Concept',
+      'FLOW Android App',
       'Guitar',
       'Music',
     ],
@@ -100,19 +113,57 @@ export function getSeoMetadata({
     publisher: { '@id': personId },
   };
 
+  const flowDistribution = resolveFlowDistributionAction(FLOW_RELEASE_CONFIG);
+
   const pageEntity = isFlow
-    ? {
-        '@type': 'CreativeWork',
-        '@id': `${flowUrl}#casestudy`,
-        name: 'FLOW — Personal Daily-Life Application Concept',
-        headline: title,
-        description,
-        url: flowUrl,
-        inLanguage: locale,
-        author: { '@id': personId },
-        isPartOf: { '@id': websiteId },
-        creativeWorkStatus: 'In Development',
-      }
+    ? flowDistribution.hasConfirmedDistribution && flowDistribution.href
+      ? {
+          '@type': 'SoftwareApplication',
+          '@id': `${flowUrl}#software`,
+          name: 'FLOW',
+          headline: title,
+          description,
+          url: flowUrl,
+          downloadUrl: flowDistribution.href,
+          applicationCategory: 'ProductivityApplication',
+          operatingSystem: 'Android',
+          softwareVersion: FLOW_RELEASE_CONFIG.APP_VERSION,
+          image: flowOgImage,
+          screenshot: [
+            buildAbsoluteUrl(
+              FLOW_MEDIA_ASSETS.screens.dashboard.src,
+              siteUrlOverride
+            ),
+            buildAbsoluteUrl(
+              FLOW_MEDIA_ASSETS.screens.themes.src,
+              siteUrlOverride
+            ),
+            buildAbsoluteUrl(
+              FLOW_MEDIA_ASSETS.screens.companion.src,
+              siteUrlOverride
+            ),
+            buildAbsoluteUrl(
+              FLOW_MEDIA_ASSETS.screens.focus.src,
+              siteUrlOverride
+            ),
+          ],
+          inLanguage: locale,
+          author: { '@id': personId },
+          isPartOf: { '@id': websiteId },
+        }
+      : {
+          '@type': 'CreativeWork',
+          '@id': `${flowUrl}#casestudy`,
+          name: 'FLOW — Android Daily-Life Application Showcase',
+          headline: title,
+          description,
+          url: flowUrl,
+          image: flowOgImage,
+          inLanguage: locale,
+          author: { '@id': personId },
+          isPartOf: { '@id': websiteId },
+          creativeWorkStatus: 'In Development',
+        }
     : {
         '@type': 'ProfilePage',
         '@id': `${canonicalUrl}#profilepage`,

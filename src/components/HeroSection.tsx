@@ -3,15 +3,16 @@ import { ArrowDown, ArrowDownLeft, ArrowDownRight } from 'lucide-react';
 import {
   AnimatePresence,
   motion,
-  useReducedMotion,
   useScroll,
   useTransform,
 } from 'motion/react';
 import { ErmiaLocaleContent, Locale, MEDIA_ASSETS } from '../data/ermiaData';
+import { useMotionProfile } from '../hooks/useMotionProfile';
 import { MOTION_EASE, ThemeMode } from '../styles/designTokens';
 import { HeroPortrait } from './HeroPortrait';
 import { MagneticButton } from './MagneticButton';
 import { staggerContainerVariants, staggerItemVariants } from './ScrollReveal';
+import { TextReveal } from './TextReveal';
 
 interface HeroSectionProps {
   locale: Locale;
@@ -26,7 +27,7 @@ export function HeroSection({
   content,
   onNavigate,
 }: HeroSectionProps) {
-  const prefersReducedMotion = useReducedMotion();
+  const { prefersReducedMotion, allowParallax } = useMotionProfile();
   const [morphActive, setMorphActive] = useState(false);
   const heroRef = useRef<HTMLElement | null>(null);
   const CtaArrow = locale === 'fa' ? ArrowDownLeft : ArrowDownRight;
@@ -98,28 +99,54 @@ export function HeroSection({
 
         {/* Semantic H1 (Ermia Yazdani), Visual Subtitle (Ideas Become Reality) & Introduction */}
         <motion.div
-          style={prefersReducedMotion ? undefined : { y: copyScrollY }}
+          style={
+            !allowParallax || prefersReducedMotion
+              ? undefined
+              : { y: copyScrollY }
+          }
           className="mt-7 flex max-w-2xl flex-col items-center text-center sm:mt-8"
         >
-          <h1 className="font-display text-[clamp(2.2rem,4.9vw,3.85rem)] font-semibold leading-[1.05] tracking-tight text-[var(--ermia-text)] text-balance">
+          <TextReveal
+            as="h1"
+            locale={locale}
+            immediate
+            splitChars
+            className="font-display text-[clamp(2.2rem,4.9vw,3.85rem)] font-semibold leading-[1.05] tracking-tight text-[var(--ermia-text)] text-balance"
+          >
             {content.fullName}
-          </h1>
+          </TextReveal>
 
-          <p className="mt-2 font-display text-lg font-medium tracking-tight text-[var(--ermia-accent)] sm:text-2xl">
+          <TextReveal
+            as="p"
+            locale={locale}
+            immediate
+            splitWords
+            delay={0.16}
+            className="mt-2 font-display text-lg font-medium tracking-tight text-[var(--ermia-accent)] sm:text-2xl"
+          >
             {content.headline}
-          </p>
+          </TextReveal>
 
-          <p className="mt-3.5 max-w-xl text-sm leading-[1.75] text-[var(--ermia-text-secondary)] sm:text-base">
+          <motion.p
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.2,
+              ease: MOTION_EASE.cinematic,
+            }}
+            className="mt-3.5 max-w-xl text-sm leading-[1.75] text-[var(--ermia-text-secondary)] sm:text-base"
+          >
             {content.intro}
-          </p>
+          </motion.p>
 
           {/* Magnetic Navigation CTAs */}
           <motion.div
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              duration: 0.6,
-              delay: 0.48,
+              duration: 0.52,
+              delay: 0.24,
               ease: MOTION_EASE.cinematic,
             }}
             className="mt-6 flex flex-wrap items-center justify-center gap-3.5 sm:mt-7 sm:gap-4"

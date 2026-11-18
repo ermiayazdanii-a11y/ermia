@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpLeft, ArrowUpRight, Layers, Sparkles } from 'lucide-react';
 import {
   motion,
-  useReducedMotion,
   useScroll,
   useSpring,
 } from 'motion/react';
@@ -11,7 +10,13 @@ import {
   JourneyMilestone,
   Locale,
 } from '../data/ermiaData';
-import { SPRING_CONFIG, ThemeMode } from '../styles/designTokens';
+import { useMotionProfile } from '../hooks/useMotionProfile';
+import {
+  MOTION_EASE,
+  REVEAL_VIEWPORT,
+  SPRING_CONFIG,
+  ThemeMode,
+} from '../styles/designTokens';
 import { ImageReveal } from './ImageReveal';
 import { InteractiveProjectCard } from './InteractiveProjectCard';
 import { ScrollReveal } from './ScrollReveal';
@@ -39,7 +44,8 @@ export function JourneyTimelineSection({
   const milestoneRefs = useRef<Record<string, HTMLElement | null>>({});
   const periodNavRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const timelineContainerRef = useRef<HTMLDivElement | null>(null);
-  const prefersReducedMotion = useReducedMotion();
+  const { prefersReducedMotion, allow3DTilt, revealDurationMultiplier } =
+    useMotionProfile();
 
   const displayedMilestones = useMemo(
     () =>
@@ -57,6 +63,13 @@ export function JourneyTimelineSection({
         : displayedMilestones[0].id
     );
   }, [displayedMilestones]);
+
+  const activeMilestoneIndex = useMemo(() => {
+    const idx = displayedMilestones.findIndex(
+      (m) => m.id === activeMilestoneId
+    );
+    return idx >= 0 ? idx : 0;
+  }, [displayedMilestones, activeMilestoneId]);
 
   const { scrollYProgress } = useScroll({
     target: timelineContainerRef,
@@ -77,8 +90,8 @@ export function JourneyTimelineSection({
         }
       },
       {
-        rootMargin: '-35% 0px -45% 0px',
-        threshold: 0.1,
+        rootMargin: '-32% 0px -48% 0px',
+        threshold: 0.12,
       }
     );
 
@@ -160,7 +173,7 @@ export function JourneyTimelineSection({
   return (
     <section
       id="journey"
-      className="scroll-mt-24 border-t border-[var(--ermia-border)] mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28"
+      className="mx-auto max-w-6xl scroll-mt-24 border-t border-[var(--ermia-border)] px-4 py-20 sm:px-6 sm:py-28"
     >
       <ScrollReveal className="max-w-3xl">
         <div className="flex items-center gap-3 text-xs font-medium text-[var(--ermia-accent)]">
@@ -174,6 +187,7 @@ export function JourneyTimelineSection({
         </div>
         <TextReveal
           as="h2"
+          locale={locale}
           splitWords
           scrollKinetic
           className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
@@ -186,7 +200,7 @@ export function JourneyTimelineSection({
       </ScrollReveal>
 
       {/* Horizontally Scrollable Period Navigation + Progressive Focus Toggle */}
-      <div className="mt-10 rounded-2xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)]/90 p-3 backdrop-blur-md">
+      <div className="mt-10 rounded-2xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)]/95 p-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap items-center justify-between gap-2 px-1">
             <span className="text-xs font-medium text-[var(--ermia-muted)] whitespace-nowrap shrink-0">
@@ -197,7 +211,7 @@ export function JourneyTimelineSection({
               type="button"
               aria-pressed={showHighlightsOnly}
               onClick={handleToggleFilter}
-              className={`inline-flex min-h-[34px] items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium whitespace-nowrap shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer ${
+              className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium whitespace-nowrap shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer ${
                 showHighlightsOnly
                   ? 'border-[var(--ermia-accent)] bg-[var(--ermia-accent)]/12 text-[var(--ermia-accent)]'
                   : 'border-[var(--ermia-border)] bg-[var(--ermia-bg)] text-[var(--ermia-text-secondary)] hover:text-[var(--ermia-text)]'
@@ -253,17 +267,25 @@ export function JourneyTimelineSection({
         </div>
       </div>
 
-      {/* Start marker */}
-      <div className="mt-10 text-center">
-        <p className="text-xs text-[var(--ermia-muted)]">{content.startLabel}</p>
+      {/* Start indicator aligned directly above the rail center */}
+      <div className="mt-10 flex items-center text-xs font-mono text-[var(--ermia-muted)] lg:justify-center">
+        <span>{content.startLabel}</span>
       </div>
 
-      {/* Connected Chronological Timeline */}
-      <div ref={timelineContainerRef} className="relative mt-8">
-        {/* Desktop Center Track */}
+      {/*
+        RESTORED ALTERNATING 3-COLUMN DESKTOP CSS GRID & COMPACT MOBILE VERTICAL RAIL:
+        - Desktop (lg+): symmetric [1fr | 72px center timeline | 1fr], gap-x-0.
+          Even entries -> Card in Col 1 (start), opposite chapter label in Col 3 (end).
+          Odd entries  -> Card in Col 3 (end), opposite chapter label in Col 1 (start).
+          Central connecting line runs along left-1/2 (-translate-x-1/2) — exact horizontal center of the 72px middle column.
+          Horizontal connectors span strictly inside Column 2 from marker perimeter to card edge.
+        - Mobile (< lg): single-sided [32px rail | gap-x-3 | 1fr card], line centered at start-[16px].
+      */}
+      <div ref={timelineContainerRef} className="relative mt-6">
+        {/* Continuous vertical timeline line */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-px -translate-x-1/2 bg-[var(--ermia-border)] lg:block"
+          className="pointer-events-none absolute top-7 bottom-7 start-[16px] w-[1.5px] -translate-x-1/2 bg-[var(--ermia-border)] sm:start-[20px] rtl:translate-x-1/2 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 rtl:lg:-translate-x-1/2"
         >
           <motion.div
             style={
@@ -271,32 +293,16 @@ export function JourneyTimelineSection({
                 ? undefined
                 : { scaleY: smoothLineProgress, transformOrigin: 'top' }
             }
-            className="h-full w-full bg-[var(--ermia-accent)] shadow-[0_0_14px_rgba(var(--ermia-spotlight-rgb),0.4)]"
+            className="h-full w-full bg-[var(--ermia-accent)] shadow-[0_0_12px_rgba(var(--ermia-spotlight-rgb),0.45)]"
           />
         </div>
 
-        {/* Mobile Vertical Track */}
-        <div
-          aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-0 w-px bg-[var(--ermia-border)] lg:hidden ${
-            locale === 'fa' ? 'right-4' : 'left-4'
-          }`}
-        >
-          <motion.div
-            style={
-              prefersReducedMotion
-                ? undefined
-                : { scaleY: smoothLineProgress, transformOrigin: 'top' }
-            }
-            className="h-full w-full bg-[var(--ermia-accent)]"
-          />
-        </div>
-
-        <div className="space-y-12 lg:space-y-16">
+        <div className="space-y-9 sm:space-y-12 lg:space-y-14">
           {displayedMilestones.map((milestone: JourneyMilestone, idx: number) => {
-            const isEven = idx % 2 === 0;
-            const isActive = activeMilestoneId === milestone.id;
+            const isActive = idx === activeMilestoneIndex;
+            const isCompleted = idx < activeMilestoneIndex;
             const isHighlight = milestone.importance === 'highlight';
+            const isStartSideCard = idx % 2 === 0;
 
             return (
               <article
@@ -305,80 +311,160 @@ export function JourneyTimelineSection({
                 ref={(el) => {
                   milestoneRefs.current[milestone.id] = el;
                 }}
-                className="relative grid grid-cols-1 items-center gap-6 lg:grid-cols-12 lg:gap-12"
+                className="relative grid grid-cols-[32px_minmax(0,1fr)] items-start gap-x-3 sm:grid-cols-[40px_minmax(0,1fr)] sm:gap-x-4 lg:grid-cols-[minmax(0,1fr)_72px_minmax(0,1fr)] lg:gap-x-0"
               >
-                {/* Glowing Timeline Node */}
+                {/* Opposite Desktop Empty Column holding clean Chapter Number & Year OUTSIDE text cards */}
                 <div
-                  aria-hidden="true"
-                  className={`absolute top-6 z-20 flex h-4 w-4 items-center justify-center rounded-full border transition-all duration-300 lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 ${
-                    locale === 'fa'
-                      ? 'right-[8.5px] lg:right-auto'
-                      : 'left-[8.5px]'
-                  } ${
-                    isActive || isHighlight
-                      ? 'scale-110 border-[var(--ermia-accent)] bg-[var(--ermia-accent)] shadow-[0_0_16px_rgba(var(--ermia-spotlight-rgb),0.55)]'
-                      : 'border-[var(--ermia-border-strong)] bg-[var(--ermia-bg)]'
+                  className={`hidden lg:row-start-1 lg:flex lg:flex-col lg:pt-5 ${
+                    isStartSideCard
+                      ? 'lg:col-start-3 lg:items-start lg:ps-5 lg:text-start'
+                      : 'lg:col-start-1 lg:items-end lg:pe-5 lg:text-end'
                   }`}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--ermia-accent-contrast)]" />
-                </div>
-
-                {/* Outlined Monumental Period / Chapter Typography */}
-                <ScrollReveal
-                  delay={0.05}
-                  className={`hidden lg:flex lg:col-span-5 ${
-                    isEven
-                      ? 'lg:order-2 lg:justify-start'
-                      : 'lg:order-1 lg:justify-end'
-                  }`}
-                >
-                  <div className="select-none">
-                    <p
-                      dir="ltr"
-                      style={{
-                        WebkitTextStroke: isActive
-                          ? '1.25px var(--ermia-stroke-active)'
-                          : '1px var(--ermia-stroke-inactive)',
-                      }}
-                      className={`font-display text-6xl font-bold tracking-tight text-transparent transition-all duration-300 xl:text-7xl ${
-                        isActive ? 'scale-[1.03]' : 'scale-100 opacity-75'
+                  <motion.div
+                    initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={REVEAL_VIEWPORT}
+                    transition={{
+                      duration: 0.45 * revealDurationMultiplier,
+                      ease: MOTION_EASE.cinematic,
+                    }}
+                    className="select-none"
+                  >
+                    <span
+                      className={`block font-mono text-4xl font-semibold tabular-nums leading-none tracking-tight transition-colors duration-200 ${
+                        isActive
+                          ? 'text-[var(--ermia-accent)]'
+                          : isCompleted
+                            ? 'text-[var(--ermia-text)]/70'
+                            : 'text-[var(--ermia-muted)]/60'
                       }`}
                     >
                       {milestone.number}
-                    </p>
-                    <p className="mt-1.5 font-mono text-xs tabular-nums text-[var(--ermia-muted)]">
-                      {milestone.year} · {milestone.category}
-                    </p>
-                  </div>
-                </ScrollReveal>
+                    </span>
+                    <span className="mt-2 block font-display text-base font-medium text-[var(--ermia-text)]">
+                      {milestone.year}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-[var(--ermia-muted)]">
+                      {milestone.date}
+                    </span>
+                  </motion.div>
+                </div>
 
-                {/* Interactive Milestone Content Card */}
-                <ScrollReveal
-                  className={`${
-                    locale === 'fa' ? 'pr-11 lg:pr-0' : 'pl-11 lg:pl-0'
-                  } lg:col-span-7 ${
-                    isEven ? 'lg:order-1' : 'lg:order-2'
+                {/* Dedicated Central / Left Timeline Rail Column (strictly isolated markers & connectors) */}
+                <div className="relative col-start-1 row-start-1 flex h-16 items-start justify-center pt-6 lg:col-start-2 lg:row-start-1">
+                  {/* Horizontal connector linking active/completed marker toward its card without overlapping text */}
+                  <motion.span
+                    aria-hidden="true"
+                    initial={false}
+                    animate={{
+                      scaleX: isActive ? 1 : isCompleted ? 0.65 : 0.4,
+                      opacity: isActive ? 1 : isCompleted ? 0.55 : 0.25,
+                    }}
+                    transition={SPRING_CONFIG.timelineConnector}
+                    className={`pointer-events-none hidden lg:block absolute top-[35px] h-px w-[calc(50%-10px)] ${
+                      isActive
+                        ? 'bg-[var(--ermia-accent)] shadow-[0_0_8px_rgba(var(--ermia-spotlight-rgb),0.55)]'
+                        : 'bg-[var(--ermia-border-strong)]'
+                    } ${
+                      isStartSideCard
+                        ? 'start-0 origin-right rtl:origin-left'
+                        : 'end-0 origin-left rtl:origin-right'
+                    }`}
+                  />
+
+                  {/* Mobile single-sided horizontal connector */}
+                  <span
+                    aria-hidden="true"
+                    className={`pointer-events-none absolute top-[35px] end-0 h-px w-[calc(50%-8px)] lg:hidden ${
+                      isActive
+                        ? 'bg-[var(--ermia-accent)]'
+                        : 'bg-[var(--ermia-border-strong)]/70'
+                    }`}
+                  />
+
+                  <motion.button
+                    type="button"
+                    onClick={() => jumpToMilestone(milestone.id)}
+                    aria-label={`${milestone.number} ${milestone.title}`}
+                    aria-current={isActive ? 'step' : undefined}
+                    initial={prefersReducedMotion ? false : { scale: 0.72, opacity: 0 }}
+                    whileInView={{ scale: isActive ? 1.15 : 1, opacity: 1 }}
+                    viewport={REVEAL_VIEWPORT}
+                    transition={SPRING_CONFIG.timelineMarker}
+                    className="relative flex h-8 w-8 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
+                  >
+                    {/* Restrained glowing lime aura on active node only */}
+                    {isActive && (
+                      <motion.span
+                        aria-hidden="true"
+                        layoutId="journey-active-halo"
+                        transition={SPRING_CONFIG.timelineMarker}
+                        className="pointer-events-none absolute inset-0 rounded-full bg-[var(--ermia-accent)]/20 ring-1 ring-[var(--ermia-accent)]/45 shadow-[0_0_16px_rgba(var(--ermia-spotlight-rgb),0.4)]"
+                      />
+                    )}
+
+                    {/* Center dot cleanly anchored on top of the line */}
+                    <span
+                      aria-hidden="true"
+                      className={`relative block rounded-full border-2 transition-colors duration-200 ${
+                        isActive
+                          ? 'h-3.5 w-3.5 border-[var(--ermia-accent)] bg-[var(--ermia-accent)]'
+                          : isCompleted
+                            ? 'h-3 w-3 border-[var(--ermia-accent)]/80 bg-[var(--ermia-accent)]/75'
+                            : isHighlight
+                              ? 'h-3 w-3 border-[var(--ermia-accent)]/55 bg-[var(--ermia-bg)]'
+                              : 'h-2.5 w-2.5 border-[var(--ermia-border-strong)] bg-[var(--ermia-bg)]'
+                      }`}
+                    />
+                  </motion.button>
+                </div>
+
+                {/* Dedicated Alternating Content Card Column */}
+                <motion.div
+                  initial={
+                    prefersReducedMotion
+                      ? false
+                      : {
+                          opacity: 0,
+                          x: isStartSideCard ? -16 : 16,
+                          y: 12,
+                        }
+                  }
+                  whileInView={{ opacity: 1, x: 0, y: 0 }}
+                  viewport={REVEAL_VIEWPORT}
+                  transition={{
+                    duration: 0.56 * revealDurationMultiplier,
+                    ease: MOTION_EASE.cinematic,
+                  }}
+                  className={`col-start-2 min-w-0 lg:row-start-1 ${
+                    isStartSideCard ? 'lg:col-start-1' : 'lg:col-start-3'
                   }`}
                 >
                   <InteractiveProjectCard
-                    enableTilt={false}
+                    enableTilt={allow3DTilt}
+                    tiltStrength="subtle"
                     theme={theme}
-                    className={`p-6 sm:p-8 ${
-                      isHighlight
-                        ? 'border-[var(--ermia-accent)]/45 shadow-[0_18px_40px_-24px_rgba(var(--ermia-spotlight-rgb),0.25)]'
-                        : isActive
+                    className={`p-5 sm:p-6 ${
+                      isActive
+                        ? 'border-[var(--ermia-accent)]/60 shadow-[0_18px_40px_-24px_rgba(var(--ermia-spotlight-rgb),0.32)]'
+                        : isHighlight
                           ? 'border-[var(--ermia-border-strong)]'
                           : ''
                     }`}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                       <div className="flex flex-wrap items-center gap-2 text-[var(--ermia-text-secondary)]">
-                        <span className="font-mono tabular-nums text-[var(--ermia-accent)]">
+                        <span className="font-mono tabular-nums text-[var(--ermia-accent)] lg:hidden">
                           {milestone.number}
                         </span>
-                        <span aria-hidden="true">·</span>
-                        <span>{milestone.date}</span>
-                        <span aria-hidden="true">·</span>
+                        <span aria-hidden="true" className="lg:hidden">
+                          ·
+                        </span>
+                        <span className="lg:hidden">{milestone.date}</span>
+                        <span aria-hidden="true" className="lg:hidden">
+                          ·
+                        </span>
                         <span>{milestone.category}</span>
                       </div>
 
@@ -390,11 +476,11 @@ export function JourneyTimelineSection({
                       )}
                     </div>
 
-                    <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-2xl">
+                    <h3 className="mt-3 font-display text-lg font-semibold tracking-tight text-[var(--ermia-text)] sm:text-xl">
                       {milestone.title}
                     </h3>
 
-                    <p className="mt-3 text-sm leading-[1.85] text-[var(--ermia-text)]/85 sm:text-base">
+                    <p className="mt-3 text-sm leading-[1.8] text-[var(--ermia-text)]/85 sm:leading-[1.85]">
                       {milestone.description}
                     </p>
 
@@ -411,20 +497,20 @@ export function JourneyTimelineSection({
 
                     {!milestone.image && milestone.conceptTag && (
                       <div className="mt-5 flex items-center justify-between gap-4 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)] px-4 py-3.5">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--ermia-border)] bg-[var(--ermia-surface)] text-[var(--ermia-accent)]">
                             <Layers className="h-4 w-4" strokeWidth={1.75} />
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <p className="font-display text-sm font-medium text-[var(--ermia-text)]">
                               FLOW
                             </p>
-                            <p className="text-xs text-[var(--ermia-text-secondary)]">
+                            <p className="truncate text-xs text-[var(--ermia-text-secondary)]">
                               {milestone.conceptTag}
                             </p>
                           </div>
                         </div>
-                        <span className="font-mono text-[11px] text-[var(--ermia-muted)]">
+                        <span className="hidden sm:inline font-mono text-[11px] text-[var(--ermia-muted)] shrink-0">
                           01 · 02 · 03
                         </span>
                       </div>
@@ -456,7 +542,7 @@ export function JourneyTimelineSection({
                             onClick={(e) =>
                               handleLinkClick(e, link.href, link.isExternal)
                             }
-                            className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--ermia-accent)] transition-opacity duration-150 hover:opacity-80"
+                            className="inline-flex min-h-[36px] items-center gap-1.5 text-xs font-medium text-[var(--ermia-accent)] transition-opacity duration-150 hover:opacity-80"
                           >
                             <span>{link.label}</span>
                             <LinkArrow className="h-3.5 w-3.5" strokeWidth={2} />
@@ -465,7 +551,7 @@ export function JourneyTimelineSection({
                       </div>
                     )}
                   </InteractiveProjectCard>
-                </ScrollReveal>
+                </motion.div>
               </article>
             );
           })}

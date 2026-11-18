@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { LenisRef, ReactLenis } from 'lenis/react';
-import { cancelFrame, frame, useReducedMotion } from 'motion/react';
+import { AnimatePresence, cancelFrame, frame, motion, useReducedMotion } from 'motion/react';
 import { AboutSection } from './components/AboutSection';
 import { AmbientBackground } from './components/AmbientBackground';
 import { CursorSpotlight } from './components/CursorSpotlight';
@@ -20,10 +20,11 @@ import { LiquidGlassNav } from './components/LiquidGlassNav';
 import { LiquidPortalDivider } from './components/LiquidPortalDivider';
 import { ProjectsSection } from './components/ProjectsSection';
 import { ScrollProgress } from './components/ScrollProgress';
+import { SectionTransition } from './components/SectionTransition';
 import { SkillsInterestsSection } from './components/SkillsInterestsSection';
 import { TodayAndContactSection } from './components/TodayAndContactSection';
 import { ERMIA_CONTENT, ErmiaLocaleContent, Locale } from './data/ermiaData';
-import { LENIS_CONFIG, ThemeMode } from './styles/designTokens';
+import { LENIS_CONFIG, MOTION_EASE, ThemeMode } from './styles/designTokens';
 import {
   AppRoute,
   getRoutePath,
@@ -107,7 +108,7 @@ export default function App({
   const [locale, setLocale] = useState<Locale>(
     initialLocale ?? clientNav.locale
   );
-  const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
+  const [theme, setTheme] = useState<ThemeMode>('dark');
   const [activeSection, setActiveSection] = useState('home');
   const lenisRef = useRef<LenisRef | null>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -128,8 +129,17 @@ export default function App({
     };
   }, [prefersReducedMotion]);
 
-  // Apply Dark / Light mode class and color-scheme synchronously
+  // Sync client persisted / system theme after SSR hydration cleanly (inline <head> script handles frame-0 CSS)
+  const hasHydratedThemeRef = useRef(false);
   useEffect(() => {
+    if (!hasHydratedThemeRef.current) {
+      hasHydratedThemeRef.current = true;
+      const clientTheme = getInitialTheme();
+      if (clientTheme !== 'dark') {
+        setTheme(clientTheme);
+        return;
+      }
+    }
     const isDark = theme === 'dark';
     document.documentElement.classList.toggle('dark', isDark);
     document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
@@ -472,7 +482,17 @@ export default function App({
 
             <EditorialMarquee items={content.hero.marqueeItems} />
 
+            <SectionTransition
+              indexLabel="01"
+              sectionLabel={sectionLabels.about}
+            />
+
             <AboutSection locale={locale} content={content.about} />
+
+            <SectionTransition
+              indexLabel="02"
+              sectionLabel={sectionLabels.journey}
+            />
 
             <JourneyTimelineSection
               locale={locale}
@@ -499,13 +519,28 @@ export default function App({
               bottomBgClass="text-[var(--ermia-bg-secondary)]/70"
             />
 
+            <SectionTransition
+              indexLabel="04"
+              sectionLabel={sectionLabels.skills}
+            />
+
             <SkillsInterestsSection
               locale={locale}
               theme={theme}
               content={content.skills}
             />
 
+            <SectionTransition
+              indexLabel="05"
+              sectionLabel={sectionLabels.journal}
+            />
+
             <JournalSection locale={locale} content={content.journal} />
+
+            <SectionTransition
+              indexLabel="06"
+              sectionLabel={sectionLabels.today}
+            />
           </main>
 
           <TodayAndContactSection
@@ -519,6 +554,16 @@ export default function App({
           />
         </>
       )}
+      <AnimatePresence initial={false}>
+        <motion.span
+          key={`${locale}-${theme}`}
+          aria-hidden="true"
+          initial={prefersReducedMotion ? false : { opacity: 0.28 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: 0.26, ease: MOTION_EASE.cinematic }}
+          className="pointer-events-none fixed inset-0 z-50 bg-[var(--ermia-bg)]"
+        />
+      </AnimatePresence>
     </div>
   );
 

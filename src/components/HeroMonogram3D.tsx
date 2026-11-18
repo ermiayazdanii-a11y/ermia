@@ -46,7 +46,7 @@ export function HeroMonogram3D({ theme, ariaLabel }: HeroMonogram3DProps) {
       setIsFinePointer(false);
       return;
     }
-    const query = window.matchMedia('(pointer: fine)');
+    const query = window.matchMedia('(hover: hover) and (pointer: fine)');
     const sync = () => setIsFinePointer(query.matches);
     sync();
     query.addEventListener('change', sync);
@@ -84,11 +84,11 @@ export function HeroMonogram3D({ theme, ariaLabel }: HeroMonogram3DProps) {
     const nextAngle = tiltState % 2 === 0 ? 22 : -20;
     setTiltState((prev) => prev + 1);
     animate(rawRotateY, [nextAngle, -nextAngle * 0.45, -12], {
-      duration: 0.72,
+      duration: 0.68,
       ease: MOTION_EASE.cinematic,
     });
     animate(rawRotateX, [16, -6, 8], {
-      duration: 0.72,
+      duration: 0.68,
       ease: MOTION_EASE.cinematic,
     });
   };
@@ -102,20 +102,20 @@ export function HeroMonogram3D({ theme, ariaLabel }: HeroMonogram3DProps) {
       onPointerLeave={handlePointerLeave}
       aria-label={ariaLabel}
       initial={
-        prefersReducedMotion ? false : { opacity: 0, scale: 0.86, y: 12 }
+        prefersReducedMotion ? false : { opacity: 0, scale: 0.88, y: 10 }
       }
       animate={{ opacity: 1, scale: 1, y: 0 }}
       whileTap={prefersReducedMotion ? undefined : { scale: 0.94 }}
-      transition={{ duration: 0.72, delay: 0.25, ease: MOTION_EASE.cinematic }}
-      className="perspective-stage group/prism relative flex h-18 w-18 items-center justify-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] sm:h-22 sm:w-22 cursor-pointer"
+      transition={{ duration: 0.65, delay: 0.22, ease: MOTION_EASE.cinematic }}
+      className="perspective-stage group/prism relative flex h-16 w-16 items-center justify-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] sm:h-22 sm:w-22 cursor-pointer"
     >
-      {/* Subtle ambient backlight halo behind the 3D artifact */}
+      {/* Subtle ambient backlight halo behind the 3D artifact (no CSS blur filter) */}
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute -inset-2 -z-10 rounded-3xl opacity-75 blur-xl transition-opacity duration-300 group-hover/prism:opacity-100"
+        className="pointer-events-none absolute -inset-3 -z-10 rounded-full opacity-80 transition-opacity duration-300 group-hover/prism:opacity-100"
         style={{
           background:
-            'radial-gradient(circle, rgba(var(--ermia-spotlight-rgb), 0.28) 0%, transparent 70%)',
+            'radial-gradient(circle, rgba(var(--ermia-spotlight-rgb), 0.24) 0%, rgba(var(--ermia-spotlight-rgb), 0.06) 45%, transparent 72%)',
         }}
       />
 

@@ -5,10 +5,10 @@ import {
   motion,
   useMotionTemplate,
   useMotionValue,
-  useReducedMotion,
   useSpring,
 } from 'motion/react';
 import { ErmiaLocaleContent, Locale } from '../data/ermiaData';
+import { useMotionProfile } from '../hooks/useMotionProfile';
 import {
   MOTION_EASE,
   SPRING_CONFIG,
@@ -44,7 +44,7 @@ export function LiquidGlassNav({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const barRef = useRef<HTMLDivElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
-  const prefersReducedMotion = useReducedMotion();
+  const { prefersReducedMotion, isFineDesktop } = useMotionProfile();
 
   const glassX = useMotionValue(0);
   const glassY = useMotionValue(0);
@@ -96,6 +96,7 @@ export function LiquidGlassNav({
 
   const handleGlassMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (
+      !isFineDesktop ||
       prefersReducedMotion ||
       (e.pointerType && e.pointerType !== 'mouse' && e.pointerType !== 'pen')
     ) {
@@ -130,14 +131,22 @@ export function LiquidGlassNav({
           isScrolled ? 'liquid-glass-scrolled' : 'liquid-glass'
         }`}
       >
-        {/* Top specular refraction highlight hairline */}
+        {/* Top specular refraction highlight hairline + subtle desktop sweep */}
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[var(--ermia-glass-edge)] to-transparent opacity-70"
         />
+        {!prefersReducedMotion && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-4 top-0 h-[1.5px] overflow-hidden"
+          >
+            <span className="animate-glass-sweep block h-full w-2/5 bg-gradient-to-r from-transparent via-[var(--ermia-accent)]/55 to-transparent" />
+          </span>
+        )}
 
         {/* Subtle cursor-reactive refraction shimmer */}
-        {!prefersReducedMotion && (
+        {isFineDesktop && !prefersReducedMotion && (
           <motion.div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0"
@@ -211,10 +220,12 @@ export function LiquidGlassNav({
             navItems.map((item) => {
               const isActive = activeSection === item.id;
               return (
-                <a
+                <motion.a
                   key={item.id}
                   href={`#${item.id}`}
                   aria-current={isActive ? 'location' : undefined}
+                  whileHover={isFineDesktop && !prefersReducedMotion ? { y: -1 } : undefined}
+                  whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
                   onClick={(e) => {
                     e.preventDefault();
                     handleLinkClick(item.id);
@@ -234,7 +245,7 @@ export function LiquidGlassNav({
                       className="absolute inset-x-0 -bottom-0.5 h-[1.5px] rounded-full bg-[var(--ermia-accent)]"
                     />
                   )}
-                </a>
+                </motion.a>
               );
             })
           )}
@@ -247,26 +258,61 @@ export function LiquidGlassNav({
             onClick={onToggleTheme}
             aria-label={isDark ? content.themeLightLabel : content.themeDarkLabel}
             title={isDark ? content.themeLightLabel : content.themeDarkLabel}
-            className="liquid-glass-control inline-flex h-9 w-9 items-center justify-center rounded-xl text-[var(--ermia-text)] transition-all duration-150 hover:border-[var(--ermia-accent)]/60 hover:text-[var(--ermia-accent)] active:scale-[0.95] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
+            className="liquid-glass-control inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl text-[var(--ermia-text)] transition-all duration-150 hover:border-[var(--ermia-accent)]/60 hover:text-[var(--ermia-accent)] active:scale-[0.95] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
           >
-            {isDark ? (
-              <Sun className="h-4 w-4 text-[var(--ermia-accent)]" strokeWidth={1.75} />
-            ) : (
-              <Moon className="h-4 w-4 text-[var(--ermia-accent)]" strokeWidth={1.75} />
-            )}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={isDark ? 'sun' : 'moon'}
+                initial={
+                  prefersReducedMotion ? false : { opacity: 0, rotate: -45, scale: 0.7 }
+                }
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={
+                  prefersReducedMotion
+                    ? undefined
+                    : { opacity: 0, rotate: 45, scale: 0.7 }
+                }
+                transition={{ duration: 0.16, ease: MOTION_EASE.cinematic }}
+                className="inline-flex items-center justify-center"
+              >
+                {isDark ? (
+                  <Sun className="h-4 w-4 text-[var(--ermia-accent)]" strokeWidth={1.75} />
+                ) : (
+                  <Moon className="h-4 w-4 text-[var(--ermia-accent)]" strokeWidth={1.75} />
+                )}
+              </motion.span>
+            </AnimatePresence>
           </button>
 
-          <button
-            type="button"
-            onClick={onToggleLocale}
-            aria-label={
-              locale === 'en' ? 'Switch to Persian' : 'Switch to English'
-            }
-            className="liquid-glass-control inline-flex min-h-[36px] items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 transition-all duration-150 hover:border-[var(--ermia-accent)]/60 hover:text-[var(--ermia-accent)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] sm:px-3 cursor-pointer"
-          >
-            <Globe className="h-3.5 w-3.5 text-[var(--ermia-accent)]" strokeWidth={1.75} />
-            <span>{content.toggleLangLabel}</span>
-          </button>
+          {currentRoute === 'home' ? (
+            <a
+              href={locale === 'en' ? '/fa/' : '/'}
+              hrefLang={locale === 'en' ? 'fa' : 'en'}
+              onClick={(e) => {
+                e.preventDefault();
+                onToggleLocale();
+              }}
+              aria-label={
+                locale === 'en' ? 'Switch to Persian' : 'Switch to English'
+              }
+              className="liquid-glass-control inline-flex min-h-[36px] items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 transition-all duration-150 hover:border-[var(--ermia-accent)]/60 hover:text-[var(--ermia-accent)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] sm:px-3 cursor-pointer"
+            >
+              <Globe className="h-3.5 w-3.5 text-[var(--ermia-accent)]" strokeWidth={1.75} />
+              <span>{content.toggleLangLabel}</span>
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={onToggleLocale}
+              aria-label={
+                locale === 'en' ? 'Switch to Persian' : 'Switch to English'
+              }
+              className="liquid-glass-control inline-flex min-h-[36px] items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 transition-all duration-150 hover:border-[var(--ermia-accent)]/60 hover:text-[var(--ermia-accent)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] sm:px-3 cursor-pointer"
+            >
+              <Globe className="h-3.5 w-3.5 text-[var(--ermia-accent)]" strokeWidth={1.75} />
+              <span>{content.toggleLangLabel}</span>
+            </button>
+          )}
 
           <button
             ref={menuButtonRef}
@@ -314,9 +360,9 @@ export function LiquidGlassNav({
                       href={`${homeBaseHref}#${item.id}`}
                       aria-current={isActive ? 'location' : undefined}
                       initial={
-                        prefersReducedMotion ? false : { opacity: 0, x: -6 }
+                        prefersReducedMotion ? false : { opacity: 0, y: -4 }
                       }
-                      animate={{ opacity: 1, x: 0 }}
+                      animate={{ opacity: 1, y: 0 }}
                       transition={{
                         duration: 0.2,
                         delay: prefersReducedMotion ? 0 : idx * 0.03,

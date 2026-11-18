@@ -4,6 +4,7 @@ import {
   useMotionTemplate,
   useMotionValue,
   useReducedMotion,
+  useScroll,
   useSpring,
   useTransform,
 } from 'motion/react';
@@ -29,6 +30,8 @@ export function AmbientBackground() {
   );
 
   // Restrained living displacement of the background coordinate lattice
+  const { scrollYProgress } = useScroll();
+  const scrollDriftY = useTransform(scrollYProgress, [0, 1], [0, -24]);
   const gridShiftX = useTransform(smoothNormX, [-1, 1], [-5, 5]);
   const gridShiftY = useTransform(smoothNormY, [-1, 1], [-5, 5]);
 
@@ -39,7 +42,7 @@ export function AmbientBackground() {
       setIsFinePointer(false);
       return;
     }
-    const query = window.matchMedia('(pointer: fine)');
+    const query = window.matchMedia('(hover: hover) and (pointer: fine)');
     const sync = () => setIsFinePointer(query.matches);
     sync();
     query.addEventListener('change', sync);
@@ -98,6 +101,7 @@ export function AmbientBackground() {
         style={{
           x: isFinePointer && !prefersReducedMotion ? gridShiftX : 0,
           y: isFinePointer && !prefersReducedMotion ? gridShiftY : 0,
+          translateY: !prefersReducedMotion ? scrollDriftY : 0,
           backgroundImage:
             'linear-gradient(to right, var(--ermia-grid-line) 1px, transparent 1px), linear-gradient(to bottom, var(--ermia-grid-line) 1px, transparent 1px)',
           backgroundSize: '72px 72px',

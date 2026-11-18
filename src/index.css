@@ -90,71 +90,71 @@
   }
 }
 
-/* Dual-theme Liquid Glass navigation surface */
+/* Dual-theme Liquid Glass navigation surface (restrained single-layer blur) */
 .liquid-glass {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.84) 0%,
-    rgba(234, 237, 223, 0.76) 100%
+    rgba(255, 255, 255, 0.86) 0%,
+    rgba(234, 237, 223, 0.78) 100%
   );
-  backdrop-filter: blur(16px) saturate(145%);
-  -webkit-backdrop-filter: blur(16px) saturate(145%);
-  border: 1px solid rgba(23, 27, 20, 0.12);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(23, 27, 20, 0.11);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
-    inset 0 -1px 0 0 rgba(83, 106, 0, 0.06),
-    0 12px 30px -16px rgba(23, 27, 20, 0.14);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 0 rgba(83, 106, 0, 0.05),
+    0 12px 28px -18px rgba(23, 27, 20, 0.16);
 }
 
 .liquid-glass-scrolled {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.94) 0%,
-    rgba(244, 245, 239, 0.9) 100%
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(244, 245, 239, 0.91) 100%
   );
-  backdrop-filter: blur(18px) saturate(155%);
-  -webkit-backdrop-filter: blur(18px) saturate(155%);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
   border: 1px solid rgba(23, 27, 20, 0.16);
   box-shadow:
     inset 0 1px 0 0 rgba(255, 255, 255, 0.96),
     inset 0 -1px 0 0 rgba(83, 106, 0, 0.08),
-    0 16px 38px -16px rgba(23, 27, 20, 0.18);
+    0 16px 34px -18px rgba(23, 27, 20, 0.2);
 }
 
 .liquid-glass-control {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.68) 0%,
-    rgba(23, 27, 20, 0.03) 100%
+    rgba(255, 255, 255, 0.74) 0%,
+    rgba(23, 27, 20, 0.035) 100%
   );
   border: 1px solid rgba(23, 27, 20, 0.13);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.82);
 }
 
 .dark .liquid-glass {
   background: linear-gradient(
     180deg,
-    rgba(23, 27, 22, 0.8) 0%,
-    rgba(13, 16, 12, 0.72) 100%
+    rgba(23, 27, 22, 0.82) 0%,
+    rgba(12, 15, 11, 0.74) 100%
   );
-  border: 1px solid rgba(240, 241, 233, 0.14);
+  border: 1px solid rgba(240, 241, 233, 0.13);
   box-shadow:
-    inset 0 1px 0 0 rgba(240, 241, 233, 0.18),
+    inset 0 1px 0 0 rgba(240, 241, 233, 0.16),
     inset 0 -1px 0 0 rgba(216, 241, 90, 0.06),
-    0 18px 40px -18px rgba(0, 0, 0, 0.86);
+    0 18px 36px -20px rgba(0, 0, 0, 0.84);
 }
 
 .dark .liquid-glass-scrolled {
   background: linear-gradient(
     180deg,
-    rgba(17, 21, 15, 0.94) 0%,
-    rgba(9, 12, 9, 0.9) 100%
+    rgba(17, 21, 15, 0.95) 0%,
+    rgba(9, 12, 9, 0.92) 100%
   );
   border: 1px solid rgba(240, 241, 233, 0.18);
   box-shadow:
-    inset 0 1px 0 0 rgba(240, 241, 233, 0.22),
-    inset 0 -1px 0 0 rgba(216, 241, 90, 0.1),
-    0 20px 48px -16px rgba(0, 0, 0, 0.94);
+    inset 0 1px 0 0 rgba(240, 241, 233, 0.2),
+    inset 0 -1px 0 0 rgba(216, 241, 90, 0.09),
+    0 20px 42px -18px rgba(0, 0, 0, 0.92);
 }
 
 .dark .liquid-glass-control {
@@ -164,7 +164,7 @@
     rgba(240, 241, 233, 0.025) 100%
   );
   border: 1px solid rgba(240, 241, 233, 0.15);
-  box-shadow: inset 0 1px 0 0 rgba(240, 241, 233, 0.18);
+  box-shadow: inset 0 1px 0 0 rgba(240, 241, 233, 0.16);
 }
 
 /* Architectural 3D glass prism helpers */
@@ -222,6 +222,22 @@
   }
 }
 
+@keyframes glass-specular-sweep {
+  0%,
+  12% {
+    transform: translate3d(-110%, 0, 0);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.72;
+  }
+  58%,
+  100% {
+    transform: translate3d(125%, 0, 0);
+    opacity: 0;
+  }
+}
+
 .animate-ambient-a {
   animation: ambient-drift-a 26s ease-in-out infinite;
 }
@@ -238,6 +254,10 @@
   animation: marquee-scroll 38s linear infinite;
 }
 
+.animate-glass-sweep {
+  animation: glass-specular-sweep 9.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
 /* Lighter glass & static ambient halos on mobile viewports for smooth GPU frame times */
 @media (max-width: 767px) {
   .liquid-glass,
@@ -246,7 +266,8 @@
     -webkit-backdrop-filter: blur(10px) saturate(130%);
   }
   .animate-ambient-a,
-  .animate-ambient-b {
+  .animate-ambient-b,
+  .animate-glass-sweep {
     animation: none;
   }
 }
@@ -258,7 +279,8 @@
   .animate-ambient-a,
   .animate-ambient-b,
   .animate-scroll-cue,
-  .animate-marquee {
+  .animate-marquee,
+  .animate-glass-sweep {
     animation: none;
   }
 }

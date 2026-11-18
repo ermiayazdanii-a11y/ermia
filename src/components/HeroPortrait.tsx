@@ -51,7 +51,8 @@ export function HeroPortrait({
   // Synchronized scroll depth separation: background text drifts slightly down while foreground subject lifts
   const textScrollY = useTransform(activeScroll, [0, 1], [0, 30]);
   const subjectScrollY = useTransform(activeScroll, [0, 1], [0, -18]);
-  const haloScrollScale = useTransform(activeScroll, [0, 1], [1, 1.08]);
+  const haloScrollScale = useTransform(activeScroll, [0, 1], [1, 1.09]);
+  const stageRotateXScroll = useTransform(activeScroll, [0, 1], [0, 2.2]);
 
   // Pointer-reactive multi-plane 3D parallax rig (fine desktop) + mobile tap impulse
   const rawNormX = useMotionValue(0);
@@ -94,7 +95,7 @@ export function HeroPortrait({
       return;
     }
     const pointerQuery = window.matchMedia(
-      '(pointer: fine) and (min-width: 768px)'
+      '(hover: hover) and (pointer: fine) and (min-width: 768px)'
     );
     const update = () => setIsFineDesktop(pointerQuery.matches);
     update();
@@ -145,15 +146,15 @@ export function HeroPortrait({
     sheenOpacity.set(0);
   };
 
-  // Tactile mobile tap impulse giving responsive 3D depth without clutter
+  // Tactile mobile tap impulse giving responsive 3D depth without pointer overhead
   const handleStageTap = () => {
     if (isFineDesktop || prefersReducedMotion) return;
-    animate(tapScale, [1, 1.03, 1], {
-      duration: 0.48,
+    animate(tapScale, [1, 1.028, 1], {
+      duration: 0.44,
       ease: MOTION_EASE.cinematic,
     });
-    animate(rawNormY, [0, -0.35, 0], {
-      duration: 0.48,
+    animate(rawNormY, [0, -0.3, 0], {
+      duration: 0.44,
       ease: MOTION_EASE.cinematic,
     });
   };
@@ -166,7 +167,7 @@ export function HeroPortrait({
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       onClick={handleStageTap}
-      className="perspective-stage relative mx-auto flex h-[238px] w-full max-w-4xl items-end justify-center overflow-visible border-b border-[var(--ermia-border)] px-2 sm:h-[312px] lg:h-[364px]"
+      className="perspective-stage relative mx-auto flex h-[232px] w-full max-w-4xl items-end justify-center overflow-visible border-b border-[var(--ermia-border)] px-2 sm:h-[312px] lg:h-[372px]"
     >
       {/* Layer 0: Architectural Frame Backplate & Photographic Studio Lighting */}
       <motion.div
@@ -178,35 +179,39 @@ export function HeroPortrait({
                 x: isFineDesktop ? haloX : 0,
                 y: isFineDesktop ? haloY : 0,
                 scale: haloScrollScale,
+                z: isFineDesktop ? -42 : 0,
               }
         }
-        initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.94 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.95, ease: MOTION_EASE.cinematic }}
-        className="pointer-events-none absolute inset-x-4 top-2 bottom-0 -z-10 overflow-hidden rounded-t-[28px] border-x border-t border-[var(--ermia-border)]/75 sm:inset-x-8"
+        transition={{ duration: 0.78, ease: MOTION_EASE.cinematic }}
+        className="pointer-events-none absolute inset-x-3 top-2 bottom-0 -z-10 overflow-hidden rounded-t-[28px] border-x border-t border-[var(--ermia-border)]/75 sm:inset-x-8"
       >
+        {/* Top glass specular hairline */}
+        <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[var(--ermia-glass-edge)] to-transparent" />
+
         {/* Subtle studio vignette surface */}
         <div
           className="absolute inset-0"
           style={{
             background: isDark
-              ? 'radial-gradient(ellipse 74% 80% at 50% 42%, rgba(23, 27, 22, 0.78) 0%, rgba(9, 12, 9, 0.22) 66%, transparent 100%)'
-              : 'radial-gradient(ellipse 74% 80% at 50% 42%, rgba(255, 255, 255, 0.82) 0%, rgba(234, 237, 223, 0.28) 66%, transparent 100%)',
+              ? 'radial-gradient(ellipse 74% 80% at 50% 42%, rgba(23, 27, 22, 0.82) 0%, rgba(9, 12, 9, 0.24) 66%, transparent 100%)'
+              : 'radial-gradient(ellipse 74% 80% at 50% 42%, rgba(255, 255, 255, 0.86) 0%, rgba(234, 237, 223, 0.3) 66%, transparent 100%)',
           }}
         />
 
-        {/* Warm solar-amber rim light echoing the sun reflection inside Ermia's sunglasses */}
+        {/* Soft multi-stop studio rim light (pure radial gradient falloff, no CSS filter blur) */}
         <div
-          className="animate-ambient-a absolute left-1/2 top-[12%] h-[220px] w-[260px] -translate-x-1/2 rounded-full opacity-90 blur-xl sm:h-[290px] sm:w-[360px] sm:blur-2xl"
+          className="animate-ambient-a absolute left-1/2 top-[10%] h-[230px] w-[280px] -translate-x-1/2 rounded-full opacity-90 sm:h-[310px] sm:w-[400px]"
           style={{
             background: isDark
-              ? 'radial-gradient(circle at 58% 36%, rgba(245, 166, 35, 0.16) 0%, rgba(var(--ermia-spotlight-rgb), 0.19) 42%, transparent 74%)'
-              : 'radial-gradient(circle at 58% 36%, rgba(245, 166, 35, 0.12) 0%, rgba(var(--ermia-spotlight-rgb), 0.14) 44%, transparent 76%)',
+              ? 'radial-gradient(circle at 56% 36%, rgba(245, 166, 35, 0.14) 0%, rgba(var(--ermia-spotlight-rgb), 0.16) 36%, rgba(var(--ermia-spotlight-rgb), 0.04) 58%, transparent 76%)'
+              : 'radial-gradient(circle at 56% 36%, rgba(245, 166, 35, 0.11) 0%, rgba(var(--ermia-spotlight-rgb), 0.12) 38%, rgba(var(--ermia-spotlight-rgb), 0.03) 60%, transparent 76%)',
           }}
         />
 
-        {/* Precision camera-aperture ring framing the portrait depth */}
-        <div className="absolute left-1/2 top-[48%] h-[196px] w-[196px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--ermia-border)]/80 sm:h-[268px] sm:w-[268px] lg:h-[316px] lg:w-[316px]" />
+        {/* Precision optical aperture ring framing the portrait depth */}
+        <div className="absolute left-1/2 top-[48%] h-[192px] w-[192px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--ermia-border)]/80 sm:h-[268px] sm:w-[268px] lg:h-[324px] lg:w-[324px]" />
       </motion.div>
 
       {/* Layer 1 (z-10): Oversized Readable HTML ERMIA Typography BEHIND the Subject */}
@@ -220,6 +225,7 @@ export function HeroPortrait({
                 translateY: isFineDesktop ? textY : 0,
                 rotateX: isFineDesktop ? textRotateX : 0,
                 rotateY: isFineDesktop ? textRotateY : 0,
+                z: isFineDesktop ? -14 : 0,
                 transformStyle: 'preserve-3d',
               }
         }
@@ -262,9 +268,10 @@ export function HeroPortrait({
                 x: isFineDesktop ? fgX : 0,
                 y: subjectScrollY,
                 translateY: isFineDesktop ? fgY : 0,
-                rotateX: isFineDesktop ? fgRotateX : 0,
+                rotateX: isFineDesktop ? fgRotateX : stageRotateXScroll,
                 rotateY: isFineDesktop ? fgRotateY : 0,
                 scale: smoothTapScale,
+                z: isFineDesktop ? 24 : 0,
                 transformStyle: 'preserve-3d',
               }
         }
@@ -319,7 +326,10 @@ export function HeroPortrait({
       />
 
       {/* Layer 3 (z-30): Restrained Balanced 3D Liquid Glass & Brushed Chrome Monogram */}
-      <div className="absolute end-3 bottom-3 z-30 sm:end-10 sm:bottom-5">
+      <div
+        className="absolute end-3 bottom-3 z-30 sm:end-10 sm:bottom-5"
+        style={{ transform: isFineDesktop ? 'translateZ(46px)' : undefined }}
+      >
         <HeroMonogram3D theme={theme} ariaLabel={monogramAriaLabel} />
       </div>
     </div>

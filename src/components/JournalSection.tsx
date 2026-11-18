@@ -2,14 +2,15 @@ import { useCallback, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLenis } from 'lenis/react';
 import { ArrowUpLeft, ArrowUpRight, X } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   ErmiaLocaleContent,
   JournalEntry,
   Locale,
 } from '../data/ermiaData';
 import { useModalFocusTrap } from '../hooks/useModalFocusTrap';
-import { MOTION_EASE } from '../styles/designTokens';
+import { useMotionProfile } from '../hooks/useMotionProfile';
+import { MOTION_EASE, REVEAL_VIEWPORT } from '../styles/designTokens';
 import { ScrollReveal } from './ScrollReveal';
 import { TextReveal } from './TextReveal';
 
@@ -23,7 +24,7 @@ export function JournalSection({ locale, content }: JournalSectionProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const prefersReducedMotion = useReducedMotion();
+  const { prefersReducedMotion, revealDurationMultiplier } = useMotionProfile();
   const lenis = useLenis();
 
   const handleClose = useCallback(() => {
@@ -59,7 +60,9 @@ export function JournalSection({ locale, content }: JournalSectionProps) {
           </div>
           <TextReveal
             as="h2"
+            locale={locale}
             splitWords
+            scrollKinetic
             className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
           >
             {content.title}
@@ -70,20 +73,31 @@ export function JournalSection({ locale, content }: JournalSectionProps) {
         </ScrollReveal>
 
         {/* Clean Editorial List */}
-        <ScrollReveal
-          delay={0.08}
-          className="mt-10 divide-y divide-[var(--ermia-border)] border-y border-[var(--ermia-border)]"
-        >
-          {content.entries.map((entry) => (
-            <article key={entry.id}>
+        <div className="mt-10 divide-y divide-[var(--ermia-border)] border-y border-[var(--ermia-border)]">
+          {content.entries.map((entry, idx) => (
+            <motion.article
+              key={entry.id}
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={REVEAL_VIEWPORT}
+              transition={{
+                duration: 0.48 * revealDurationMultiplier,
+                delay: prefersReducedMotion ? 0 : idx * 0.055,
+                ease: MOTION_EASE.cinematic,
+              }}
+            >
               <button
                 type="button"
                 onClick={(e) => {
                   lastTriggerRef.current = e.currentTarget;
                   setActiveEntry(entry);
                 }}
-                className="group grid w-full grid-cols-1 gap-4 py-7 text-start transition-colors duration-200 hover:bg-[var(--ermia-surface)]/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] lg:grid-cols-12 lg:items-baseline lg:gap-8 lg:px-4 cursor-pointer"
+                className="group relative grid w-full grid-cols-1 gap-4 py-7 text-start transition-colors duration-200 hover:bg-[var(--ermia-surface)]/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] lg:grid-cols-12 lg:items-baseline lg:gap-8 lg:px-4 cursor-pointer"
               >
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] origin-left scale-x-0 bg-[var(--ermia-accent)]/70 transition-transform duration-300 ease-out group-hover:scale-x-100 rtl:origin-right"
+                />
                 <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--ermia-text-secondary)] lg:col-span-4">
                   <span className="font-mono tabular-nums text-[var(--ermia-accent)]">
                     {entry.index}
@@ -112,9 +126,9 @@ export function JournalSection({ locale, content }: JournalSectionProps) {
                   </span>
                 </div>
               </button>
-            </article>
+            </motion.article>
           ))}
-        </ScrollReveal>
+        </div>
       </div>
 
       {/* Animated Journal Reader Modal with Focus Trap, Portal Isolation & Lenis Lock */}

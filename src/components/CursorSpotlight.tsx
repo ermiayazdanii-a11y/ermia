@@ -42,7 +42,7 @@ export function CursorSpotlight({ theme }: CursorSpotlightProps) {
       return;
     }
 
-    const pointerQuery = window.matchMedia('(pointer: fine)');
+    const pointerQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
     const updatePointerCapability = () => {
       setIsFinePointer(pointerQuery.matches);
     };

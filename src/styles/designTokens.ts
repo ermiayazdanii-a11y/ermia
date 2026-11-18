@@ -94,6 +94,8 @@ export const SPRING_CONFIG = {
   monogram3d: { stiffness: 170, damping: 20, mass: 0.55 },
   tabPill: { type: 'spring' as const, stiffness: 380, damping: 32 },
   timelineLine: { stiffness: 140, damping: 26, restDelta: 0.001 },
+  timelineMarker: { type: 'spring' as const, stiffness: 360, damping: 24, mass: 0.6 },
+  timelineConnector: { duration: 0.34, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
   scrollProgress: { stiffness: 220, damping: 32, restDelta: 0.001 },
 } as const;
 

@@ -1,7 +1,9 @@
+import { useRef } from 'react';
 import { ArrowUpLeft, ArrowUpRight, Github } from 'lucide-react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion, useScroll, useTransform } from 'motion/react';
 import { SITE_CONFIG } from '../config/siteConfig';
 import { ErmiaLocaleContent, Locale } from '../data/ermiaData';
+import { useMotionProfile } from '../hooks/useMotionProfile';
 import {
   REVEAL_VIEWPORT,
   ScrollReveal,
@@ -16,56 +18,69 @@ interface AboutSectionProps {
 }
 
 export function AboutSection({ locale, content }: AboutSectionProps) {
-  const prefersReducedMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const { prefersReducedMotion, allowParallax } = useMotionProfile();
   const ExternalArrow = locale === 'fa' ? ArrowUpLeft : ArrowUpRight;
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const headerY = useTransform(scrollYProgress, [0, 1], [10, -10]);
+  const gridY = useTransform(scrollYProgress, [0, 1], [18, -14]);
 
   return (
     <section
       id="about"
+      ref={sectionRef}
       className="scroll-mt-24 bg-[var(--ermia-bg-secondary)]/70 py-20 sm:py-28"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <ScrollReveal className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-3 text-xs font-medium text-[var(--ermia-accent)]">
-              <span className="font-mono tabular-nums text-[var(--ermia-muted)]">
-                01
-              </span>
-              <span aria-hidden="true" className="text-[var(--ermia-muted)]">
-                ·
-              </span>
-              <span>{content.kicker}</span>
+        <motion.div style={allowParallax && !prefersReducedMotion ? { y: headerY } : undefined}>
+          <ScrollReveal className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-3 text-xs font-medium text-[var(--ermia-accent)]">
+                <span className="font-mono tabular-nums text-[var(--ermia-muted)]">
+                  01
+                </span>
+                <span aria-hidden="true" className="text-[var(--ermia-muted)]">
+                  ·
+                </span>
+                <span>{content.kicker}</span>
+              </div>
+              <TextReveal
+                as="h2"
+                locale={locale}
+                splitWords
+                scrollKinetic
+                className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
+              >
+                {content.title}
+              </TextReveal>
+              <p className="mt-4 text-sm leading-[1.85] text-[var(--ermia-text-secondary)] sm:text-base">
+                {content.intro}
+              </p>
             </div>
-            <TextReveal
-              as="h2"
-              splitWords
-              scrollKinetic
-              className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
-            >
-              {content.title}
-            </TextReveal>
-            <p className="mt-4 text-sm leading-[1.85] text-[var(--ermia-text-secondary)] sm:text-base">
-              {content.intro}
-            </p>
-          </div>
 
-          <a
-            href={SITE_CONFIG.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-[44px] items-center gap-2.5 self-start rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)] px-4 py-2 text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 transition-colors duration-150 hover:border-[var(--ermia-accent)] hover:text-[var(--ermia-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] lg:self-end"
-          >
-            <Github className="h-4 w-4 text-[var(--ermia-accent)]" strokeWidth={1.75} />
-            <span>{content.githubCtaLabel}</span>
-            <span dir="ltr" className="font-mono text-[var(--ermia-muted)]">
-              @{SITE_CONFIG.githubUsername}
-            </span>
-            <ExternalArrow className="h-3.5 w-3.5" strokeWidth={1.75} />
-          </a>
-        </ScrollReveal>
+            <a
+              href={SITE_CONFIG.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-[44px] items-center gap-2.5 self-start rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)] px-4 py-2 text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 transition-colors duration-150 hover:border-[var(--ermia-accent)] hover:text-[var(--ermia-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] lg:self-end"
+            >
+              <Github className="h-4 w-4 text-[var(--ermia-accent)]" strokeWidth={1.75} />
+              <span>{content.githubCtaLabel}</span>
+              <span dir="ltr" className="font-mono text-[var(--ermia-muted)]">
+                @{SITE_CONFIG.githubUsername}
+              </span>
+              <ExternalArrow className="h-3.5 w-3.5" strokeWidth={1.75} />
+            </a>
+          </ScrollReveal>
+        </motion.div>
 
         {/* Staggered 4-Pillar Editorial Grid */}
         <motion.div
+          style={allowParallax && !prefersReducedMotion ? { y: gridY } : undefined}
           variants={prefersReducedMotion ? undefined : staggerContainerVariants}
           initial={prefersReducedMotion ? false : 'hidden'}
           whileInView="visible"

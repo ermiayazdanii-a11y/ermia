@@ -31,6 +31,7 @@ export interface JourneyMilestone {
 export interface FlowScreenshot {
   id: string;
   src: string;
+  webpSrc?: string;
   alt: string;
   caption: string;
   device: 'desktop' | 'mobile';
@@ -613,7 +614,40 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
               'Guided by a calm, uncluttered flow with clear priorities',
           },
         ],
-        screenshots: [],
+        screenshots: [
+          {
+            id: 'today-dashboard',
+            src: '/assets/aistudio/photo_2026-11-18_19-56-43_dbf92142.jpg',
+            webpSrc: '/images/flow/flow-dashboard.webp',
+            alt: 'FLOW Android Today Dashboard showing Mochi companion card, Day Pulse wave slider, Open Horizon intention, and five-tab dock',
+            caption: 'Today Dashboard · Real Android Capture',
+            device: 'mobile',
+          },
+          {
+            id: 'living-space-studio',
+            src: '/assets/aistudio/photo_2026-11-18_19-56-41_0cda4cbe.jpg',
+            webpSrc: '/images/flow/flow-themes.webp',
+            alt: 'FLOW Android Living Space Studio showing Obsidian/Daylight modes, theme palettes, accent lights, and motion presets',
+            caption: 'Living Space Studio · Themes',
+            device: 'mobile',
+          },
+          {
+            id: 'companion-sanctuary',
+            src: '/assets/aistudio/photo_2026-11-18_19-56-39_2e542892.jpg',
+            webpSrc: '/images/flow/flow-companion.webp',
+            alt: 'FLOW Android Companion Sanctuary showing Mochi 2D preview controls and 16-companion collection',
+            caption: 'Companion Sanctuary · Mochi',
+            device: 'mobile',
+          },
+          {
+            id: 'focus-nebula',
+            src: '/assets/aistudio/photo_2026-11-18_19-56-35_c4bdb792.jpg',
+            webpSrc: '/images/flow/flow-focus.webp',
+            alt: 'FLOW Android Focus Nebula timer screen showing duration presets, break selector, and ambient soundscapes',
+            caption: 'Focus Nebula · Deep Flow Timer',
+            device: 'mobile',
+          },
+        ],
       },
       futureNoteTitle: 'Why Honesty Drives the Roadmap',
       futureNoteBody:
@@ -1228,7 +1262,40 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
               'یک جریان ساده، آرام و خوانا با اولویت‌بندی روشن',
           },
         ],
-        screenshots: [],
+        screenshots: [
+          {
+            id: 'today-dashboard',
+            src: '/assets/aistudio/photo_2026-11-18_19-56-43_dbf92142.jpg',
+            webpSrc: '/images/flow/flow-dashboard.webp',
+            alt: 'تصویر واقعی داشبورد امروز اپلیکیشن اندروید FLOW شامل کارت همراه Mochi، موج Day Pulse و نوار ناوبری پایین',
+            caption: 'داشبورد امروز (Today) · نسخه واقعی اندروید',
+            device: 'mobile',
+          },
+          {
+            id: 'living-space-studio',
+            src: '/assets/aistudio/photo_2026-11-18_19-56-41_0cda4cbe.jpg',
+            webpSrc: '/images/flow/flow-themes.webp',
+            alt: 'تصویر واقعی استودیوی تم و فضا در اپلیکیشن اندروید FLOW شامل حالت‌های Obsidian و Daylight و پالت‌های رنگی',
+            caption: 'استودیوی تم و فضا (Living Space)',
+            device: 'mobile',
+          },
+          {
+            id: 'companion-sanctuary',
+            src: '/assets/aistudio/photo_2026-11-18_19-56-39_2e542892.jpg',
+            webpSrc: '/images/flow/flow-companion.webp',
+            alt: 'تصویر واقعی بخش Companion Sanctuary اپلیکیشن اندروید FLOW شامل همراه Mochi و لیست مجموعه ۱۶تایی',
+            caption: 'پناهگاه همراه (Companion)',
+            device: 'mobile',
+          },
+          {
+            id: 'focus-nebula',
+            src: '/assets/aistudio/photo_2026-11-18_19-56-35_c4bdb792.jpg',
+            webpSrc: '/images/flow/flow-focus.webp',
+            alt: 'تصویر واقعی صفحه تایمر تمرکز Focus Nebula در اپلیکیشن اندروید FLOW',
+            caption: 'نبولای تمرکز (Focus Nebula)',
+            device: 'mobile',
+          },
+        ],
       },
       futureNoteTitle: 'چرا شفافیت مسیر را هدایت می‌کند',
       futureNoteBody:

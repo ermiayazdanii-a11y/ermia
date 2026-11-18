@@ -1,8 +1,9 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { ArrowUpLeft, ArrowUpRight, Check, Copy, Github, Send } from 'lucide-react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
 import { SITE_CONFIG } from '../config/siteConfig';
 import { ErmiaLocaleContent, Locale } from '../data/ermiaData';
+import { useMotionProfile } from '../hooks/useMotionProfile';
 import {
   MOTION_EASE,
   REVEAL_VIEWPORT,
@@ -47,7 +48,8 @@ export function TodayAndContactSection({
     message: string;
   } | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const prefersReducedMotion = useReducedMotion();
+  const { prefersReducedMotion, allow3DTilt, revealDurationMultiplier } =
+    useMotionProfile();
 
   const configuredMailto = SITE_CONFIG.contactEmail;
   const ExternalArrow = locale === 'fa' ? ArrowUpLeft : ArrowUpRight;
@@ -120,7 +122,8 @@ export function TodayAndContactSection({
       >
         <ScrollReveal>
           <InteractiveProjectCard
-            enableTilt={false}
+            enableTilt={allow3DTilt}
+            tiltStrength="subtle"
             theme={theme}
             className="p-6 sm:p-10"
           >
@@ -136,7 +139,9 @@ export function TodayAndContactSection({
               </div>
               <TextReveal
                 as="h2"
+                locale={locale}
                 splitWords
+                scrollKinetic
                 className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
               >
                 {todayContent.title}
@@ -147,8 +152,19 @@ export function TodayAndContactSection({
             </div>
 
             <div className="mt-10 grid grid-cols-1 gap-6 border-t border-[var(--ermia-border)] pt-8 md:grid-cols-3">
-              {todayContent.focusItems.map((item) => (
-                <div key={item.index} className="space-y-2">
+              {todayContent.focusItems.map((item, idx) => (
+                <motion.div
+                  key={item.index}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={REVEAL_VIEWPORT}
+                  transition={{
+                    duration: 0.45 * revealDurationMultiplier,
+                    delay: prefersReducedMotion ? 0 : idx * 0.06,
+                    ease: MOTION_EASE.cinematic,
+                  }}
+                  className="space-y-2"
+                >
                   <span className="font-mono text-xs tabular-nums text-[var(--ermia-accent)]">
                     {item.index}
                   </span>
@@ -158,7 +174,7 @@ export function TodayAndContactSection({
                   <p className="text-xs leading-relaxed text-[var(--ermia-text-secondary)] sm:text-sm">
                     {item.detail}
                   </p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </InteractiveProjectCard>
@@ -168,8 +184,12 @@ export function TodayAndContactSection({
       {/* Contact & Brand Signature Footer */}
       <footer
         id="contact"
-        className="scroll-mt-24 border-t border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/85 pt-20 pb-12 sm:pt-24"
+        className="relative scroll-mt-24 border-t border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/85 pt-20 pb-12 sm:pt-24"
       >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--ermia-accent)]/35 to-transparent"
+        />
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
             {/* Left: Verified Public GitHub + Honest Privacy Posture */}
@@ -185,6 +205,7 @@ export function TodayAndContactSection({
               </div>
               <TextReveal
                 as="h2"
+                locale={locale}
                 splitWords
                 className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
               >

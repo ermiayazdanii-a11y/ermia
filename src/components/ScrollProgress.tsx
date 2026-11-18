@@ -64,7 +64,7 @@ export function ScrollProgress({
       {showSectionBadge && (
         <aside
           aria-label={locale === 'fa' ? 'بخش فعال صفحه' : 'Current section indicator'}
-          className={`pointer-events-none fixed bottom-6 z-30 hidden xl:flex items-center gap-2.5 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/85 px-3.5 py-2 backdrop-blur-md ${
+          className={`pointer-events-none fixed bottom-6 z-30 hidden xl:flex items-center gap-2.5 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/95 px-3.5 py-2 shadow-[0_12px_28px_-14px_rgba(0,0,0,0.45)] ${
             locale === 'fa' ? 'left-6' : 'right-6'
           }`}
         >

@@ -14,7 +14,7 @@ import {
   Minus,
   X,
 } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   ErmiaLocaleContent,
   FlowScreenshot,
@@ -22,8 +22,14 @@ import {
   MEDIA_ASSETS,
 } from '../data/ermiaData';
 import { useModalFocusTrap } from '../hooks/useModalFocusTrap';
-import { MOTION_EASE, SPRING_CONFIG, ThemeMode } from '../styles/designTokens';
-import { CrtDigitalPreview } from './CrtDigitalPreview';
+import { useMotionProfile } from '../hooks/useMotionProfile';
+import {
+  MOTION_EASE,
+  REVEAL_VIEWPORT,
+  SPRING_CONFIG,
+  ThemeMode,
+} from '../styles/designTokens';
+import { FlowDeviceShowcase } from './FlowDeviceShowcase';
 import { ImageReveal } from './ImageReveal';
 import { LiquidImageTrail } from './LiquidImageTrail';
 import { ProjectStackCard } from './ProjectStackCard';
@@ -65,7 +71,7 @@ export function ProjectsSection({
   const closeLightboxRef = useRef<HTMLButtonElement | null>(null);
   const lastShotTriggerRef = useRef<HTMLButtonElement | null>(null);
   const chapterNavRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const prefersReducedMotion = useReducedMotion();
+  const { prefersReducedMotion, revealDurationMultiplier } = useMotionProfile();
   const lenis = useLenis();
   const project = content.featured;
   const activeFeature =
@@ -226,6 +232,7 @@ export function ProjectsSection({
             </div>
             <TextReveal
               as="h2"
+              locale={locale}
               splitWords
               scrollKinetic
               className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-4xl text-balance"
@@ -239,7 +246,7 @@ export function ProjectsSection({
         </LiquidImageTrail>
 
         {/* Accessible Quick-Jump Chapter Strip for Sticky Sequence */}
-        <div className="mt-10 flex flex-col gap-3 rounded-2xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)]/90 p-2.5 backdrop-blur-md lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-10 flex flex-col gap-3 rounded-2xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)]/95 p-2.5 lg:flex-row lg:items-center lg:justify-between">
           <nav
             aria-label="FLOW Project Stack Navigation"
             className="flex items-center gap-1.5 overflow-x-auto"
@@ -302,107 +309,81 @@ export function ProjectsSection({
             theme={theme}
           >
             <div className="grid grid-cols-1 items-stretch lg:grid-cols-12">
-              <div className="relative flex min-h-[290px] flex-col justify-between border-b border-[var(--ermia-border)] bg-[var(--ermia-bg)] p-6 sm:p-8 lg:col-span-6 lg:border-b-0 lg:border-e">
-                {project.screenshots.length > 0 ? (
-                  <CrtDigitalPreview className="h-full min-h-[260px] w-full rounded-xl border border-[var(--ermia-border)]">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        lastShotTriggerRef.current = e.currentTarget;
-                        setLightboxShot(project.screenshots[0]);
-                      }}
-                      className="group/shot relative h-full min-h-[260px] w-full overflow-hidden text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
-                    >
-                      <ImageReveal
-                        src={project.screenshots[0].src}
-                        alt={project.screenshots[0].alt}
-                        title={project.title}
-                        containerClassName="h-full w-full"
-                        className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover/shot:scale-[1.03]"
-                      />
-                      <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between gap-2 bg-gradient-to-t from-[var(--ermia-bg)]/90 via-[var(--ermia-bg)]/50 to-transparent p-4">
-                        <p className="text-xs font-medium text-[var(--ermia-accent)]">
-                          {project.screenshots[0].caption}
-                        </p>
-                        <Maximize2 className="h-4 w-4 text-[var(--ermia-text)]" />
-                      </div>
-                    </button>
-                  </CrtDigitalPreview>
-                ) : (
-                  <CrtDigitalPreview className="rounded-2xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/55 p-5 sm:p-6">
-                    <div className="relative flex h-full flex-col justify-between">
-                      <div
-                        aria-hidden="true"
-                        className="pointer-events-none absolute -top-16 -right-12 h-48 w-48 rounded-full opacity-75"
-                        style={{
-                          background:
-                            'radial-gradient(circle, rgba(var(--ermia-spotlight-rgb), 0.16) 0%, transparent 70%)',
-                        }}
-                      />
+              <div className="relative flex min-h-[290px] flex-col justify-between gap-4 border-b border-[var(--ermia-border)] bg-[var(--ermia-bg)] p-5 sm:p-8 lg:col-span-6 lg:border-b-0 lg:border-e">
+                <FlowDeviceShowcase
+                  variant="compact"
+                  conceptPreviewLabel={content.conceptPreviewLabel}
+                  stageLabels={content.stageLabels}
+                  screenshots={project.screenshots}
+                  onOpenScreenshot={(shot, triggerEl) => {
+                    lastShotTriggerRef.current = triggerEl;
+                    setLightboxShot(shot);
+                  }}
+                  activeLayer={{
+                    number: `0${activeConceptIdx + 1}`,
+                    name: activeFeature?.title ?? project.title,
+                    stage: activeFeature?.stage ?? 'conceptual',
+                    role: activeFeature?.stateLabel ?? project.subtitle,
+                    summary: activeFeature?.detail ?? project.mainConcept,
+                  }}
+                />
 
-                      <div className="relative z-10 flex items-center justify-between gap-3 text-xs text-[var(--ermia-muted)]">
-                        <span className="font-mono tracking-wide text-[var(--ermia-accent)]">
-                          {content.conceptPreviewLabel}
-                        </span>
-                        <span className="font-mono tabular-nums">
-                          0{activeConceptIdx + 1}/0{project.features.length}
-                        </span>
-                      </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-3 text-xs text-[var(--ermia-muted)]">
+                    <span>{content.conceptLayerHint}</span>
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.span
+                        key={activeConceptIdx}
+                        initial={prefersReducedMotion ? false : { opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={prefersReducedMotion ? undefined : { opacity: 0, y: -4 }}
+                        transition={{ duration: 0.16, ease: MOTION_EASE.cinematic }}
+                        className="font-mono tabular-nums text-[var(--ermia-accent)]"
+                      >
+                        0{activeConceptIdx + 1}/0{project.features.length}
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
 
-                      <p className="relative z-10 mt-2 text-xs text-[var(--ermia-text-secondary)]">
-                        {content.conceptLayerHint}
-                      </p>
-
-                      <div className="relative z-10 my-4 space-y-2">
-                        {project.features.map((feat, i) => {
-                          const selected = i === activeConceptIdx;
-                          return (
-                            <button
-                              key={feat.title}
-                              type="button"
-                              aria-pressed={selected}
-                              onClick={() => setActiveConceptIdx(i)}
-                              className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-2.5 text-start transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer ${
-                                selected
-                                  ? 'border-[var(--ermia-accent)]/60 bg-[var(--ermia-surface)] shadow-sm'
-                                  : 'border-[var(--ermia-border)] bg-[var(--ermia-surface)]/65 hover:border-[var(--ermia-accent)]/35 hover:bg-[var(--ermia-surface)]'
-                              }`}
-                            >
-                              <div className="flex min-w-0 items-center gap-3">
-                                <span className="font-mono text-xs tabular-nums text-[var(--ermia-accent)]">
-                                  0{i + 1}
-                                </span>
-                                <span className="truncate font-display text-sm font-medium text-[var(--ermia-text)]">
-                                  {feat.title}
-                                </span>
-                              </div>
-                              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--ermia-text-secondary)] whitespace-nowrap shrink-0">
-                                {renderStageIcon(feat.stage)}
-                                <span>{content.stageLabels[feat.stage]}</span>
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {activeFeature && (
-                        <div className="relative z-10 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)] p-4">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <p className="font-display text-sm font-medium text-[var(--ermia-text)]">
-                              {activeFeature.title}
-                            </p>
-                            <span className="text-[11px] font-medium text-[var(--ermia-accent)]">
-                              {activeFeature.stateLabel}
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {project.features.map((feat, i) => {
+                      const selected = i === activeConceptIdx;
+                      return (
+                        <button
+                          key={feat.title}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => setActiveConceptIdx(i)}
+                          className={`relative flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-xl border px-3.5 py-2.5 text-start transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer ${
+                            selected
+                              ? 'border-[var(--ermia-accent)]/65 bg-[var(--ermia-surface)]'
+                              : 'border-[var(--ermia-border)] bg-[var(--ermia-surface)]/65 hover:border-[var(--ermia-accent)]/35 hover:bg-[var(--ermia-surface)]'
+                          }`}
+                        >
+                          {selected && (
+                            <motion.span
+                              layoutId="flow-concept-active"
+                              aria-hidden="true"
+                              transition={SPRING_CONFIG.tabPill}
+                              className="pointer-events-none absolute inset-0 rounded-xl bg-[var(--ermia-accent)]/8 ring-1 ring-inset ring-[var(--ermia-accent)]/35"
+                            />
+                          )}
+                          <div className="relative z-10 flex min-w-0 items-center gap-2.5">
+                            <span className="font-mono text-xs tabular-nums text-[var(--ermia-accent)]">
+                              0{i + 1}
+                            </span>
+                            <span className="truncate font-display text-xs font-medium text-[var(--ermia-text)] sm:text-sm">
+                              {feat.title}
                             </span>
                           </div>
-                          <p className="mt-1.5 text-xs leading-relaxed text-[var(--ermia-text-secondary)]">
-                            {activeFeature.detail}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </CrtDigitalPreview>
-                )}
+                          <span className="relative z-10 shrink-0">
+                            {renderStageIcon(feat.stage)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               <div className="flex flex-col justify-between p-6 sm:p-8 lg:col-span-6">
@@ -663,42 +644,70 @@ export function ProjectsSection({
               </div>
 
               {project.screenshots.length > 0 ? (
-                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {project.screenshots.map((shot) => (
-                    <CrtDigitalPreview
-                      key={shot.id}
-                      className="rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)] transition-colors hover:border-[var(--ermia-accent)]/50"
-                    >
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          lastShotTriggerRef.current = e.currentTarget;
-                          setLightboxShot(shot);
+                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {project.screenshots.map((shot, shotIdx) => {
+                    const isMobileCapture = shot.device === 'mobile';
+                    return (
+                      <motion.div
+                        key={shot.id}
+                        initial={
+                          prefersReducedMotion ? false : { opacity: 0, y: 14 }
+                        }
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={REVEAL_VIEWPORT}
+                        transition={{
+                          duration: 0.48 * revealDurationMultiplier,
+                          delay: prefersReducedMotion ? 0 : shotIdx * 0.055,
+                          ease: MOTION_EASE.cinematic,
                         }}
-                        className="group/item relative w-full overflow-hidden text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
+                        className="overflow-hidden rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)] transition-colors hover:border-[var(--ermia-accent)]/50"
                       >
-                        <ImageReveal
-                          src={shot.src}
-                          alt={shot.alt}
-                          containerClassName={
-                            shot.device === 'mobile'
-                              ? 'aspect-[9/16] max-h-72 mx-auto'
-                              : 'aspect-[16/10]'
-                          }
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover/item:scale-[1.03]"
-                        />
-                        <div className="flex items-center justify-between gap-2 border-t border-[var(--ermia-border)] px-4 py-3 text-xs">
-                          <span className="truncate font-medium text-[var(--ermia-text)]">
-                            {shot.caption}
-                          </span>
-                          <Maximize2 className="h-3.5 w-3.5 shrink-0 text-[var(--ermia-muted)] group-hover/item:text-[var(--ermia-accent)]" />
-                        </div>
-                      </button>
-                    </CrtDigitalPreview>
-                  ))}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            lastShotTriggerRef.current = e.currentTarget;
+                            setLightboxShot(shot);
+                          }}
+                          className="group/item relative flex h-full w-full flex-col justify-between overflow-hidden text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] cursor-pointer"
+                        >
+                          <div className="flex w-full items-center justify-center bg-[var(--ermia-bg)] p-4">
+                            <div
+                              className={
+                                isMobileCapture
+                                  ? 'w-36 overflow-hidden rounded-[22px] border border-white/15 bg-[#0c141d] p-1 shadow-lg transition-transform duration-300 group-hover/item:-translate-y-0.5 sm:w-40'
+                                  : 'w-full overflow-hidden rounded-lg transition-transform duration-300 group-hover/item:-translate-y-0.5'
+                              }
+                            >
+                              <ImageReveal
+                                src={shot.src}
+                                webpSrc={shot.webpSrc}
+                                alt={shot.alt}
+                                containerClassName={
+                                  isMobileCapture
+                                    ? 'aspect-[1080/2460] w-full rounded-[17px]'
+                                    : 'aspect-[16/10]'
+                                }
+                                className={
+                                  isMobileCapture
+                                    ? 'h-full w-full object-contain transition-transform duration-300 group-hover/item:scale-[1.02]'
+                                    : 'h-full w-full object-cover transition-transform duration-300 group-hover/item:scale-[1.03]'
+                                }
+                              />
+                            </div>
+                          </div>
+                          <div className="flex w-full items-center justify-between gap-2 border-t border-[var(--ermia-border)] px-3.5 py-3 text-xs">
+                            <span className="truncate font-medium text-[var(--ermia-text)]">
+                              {shot.caption}
+                            </span>
+                            <Maximize2 className="h-3.5 w-3.5 shrink-0 text-[var(--ermia-muted)] transition-transform duration-200 group-hover/item:scale-110 group-hover/item:text-[var(--ermia-accent)]" />
+                          </div>
+                        </button>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               ) : (
-                <CrtDigitalPreview className="mt-6 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg)] p-5 sm:p-6">
+                <div className="mt-6 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg)] p-5 sm:p-6">
                   <div className="flex flex-col justify-between gap-6 border-b border-[var(--ermia-border)] pb-5 md:flex-row md:items-end">
                     <div className="max-w-2xl">
                       <div className="flex items-center gap-2 text-xs font-medium text-[var(--ermia-accent)]">
@@ -752,17 +761,31 @@ export function ProjectsSection({
                       </div>
                     ))}
                   </div>
-                </CrtDigitalPreview>
+                </div>
               )}
 
-              {/* Honest Roadmap Note */}
-              <div className="mt-6 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/85 p-5">
-                <p className="text-xs font-medium text-[var(--ermia-accent)]">
-                  {content.futureNoteTitle}
-                </p>
-                <p className="mt-1.5 text-xs leading-relaxed text-[var(--ermia-text-secondary)] sm:text-sm">
-                  {content.futureNoteBody}
-                </p>
+              {/* Honest Roadmap Note + Dedicated FLOW Product Page Link */}
+              <div className="mt-6 flex flex-col justify-between gap-5 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/85 p-5 md:flex-row md:items-center">
+                <div className="max-w-2xl">
+                  <p className="text-xs font-medium text-[var(--ermia-accent)]">
+                    {content.futureNoteTitle}
+                  </p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-[var(--ermia-text-secondary)] sm:text-sm">
+                    {content.futureNoteBody}
+                  </p>
+                </div>
+
+                <a
+                  href="/projects/flow"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onOpenCaseStudy();
+                  }}
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--ermia-accent)] px-5 py-2.5 text-xs font-semibold text-[var(--ermia-accent-contrast)] whitespace-nowrap shrink-0 shadow-[0_12px_28px_-12px_rgba(var(--ermia-spotlight-rgb),0.45)] transition-colors duration-150 hover:bg-[var(--ermia-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)]"
+                >
+                  <span>{content.openCaseStudyLabel}</span>
+                  <StudyArrow className="h-4 w-4" strokeWidth={2} />
+                </a>
               </div>
             </div>
           </ProjectStackCard>
@@ -824,14 +847,22 @@ export function ProjectsSection({
                     data-lenis-prevent
                     className="flex max-h-[76vh] items-center justify-center overflow-auto overscroll-contain bg-[var(--ermia-bg)] p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ermia-accent)]"
                   >
-                    <CrtDigitalPreview>
-                      <img
-                        src={lightboxShot.src}
-                        alt={lightboxShot.alt}
-                        referrerPolicy="no-referrer"
-                        className="max-h-[70vh] w-auto rounded-lg object-contain"
-                      />
-                    </CrtDigitalPreview>
+                    <div className="overflow-hidden rounded-xl border border-[var(--ermia-border)]">
+                      <picture className="block max-h-[70vh] w-auto">
+                        {lightboxShot.webpSrc && (
+                          <source
+                            srcSet={lightboxShot.webpSrc}
+                            type="image/webp"
+                          />
+                        )}
+                        <img
+                          src={lightboxShot.src}
+                          alt={lightboxShot.alt}
+                          referrerPolicy="no-referrer"
+                          className="max-h-[70vh] w-auto object-contain"
+                        />
+                      </picture>
+                    </div>
                   </div>
                 </motion.div>
               </motion.div>

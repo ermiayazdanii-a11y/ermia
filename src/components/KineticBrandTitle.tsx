@@ -2,13 +2,14 @@ import {
   MotionValue,
   motion,
   useMotionValue,
-  useReducedMotion,
   useTransform,
 } from 'motion/react';
+import { useMotionProfile } from '../hooks/useMotionProfile';
 import { MOTION_EASE } from '../styles/designTokens';
 
 const LETTERS = ['E', 'R', 'M', 'I', 'A'] as const;
 const LETTER_SPREAD_OFFSETS = [-16, -7, 0, 7, 16] as const;
+const LETTER_TILT_OFFSETS = [-4.5, -2, 0, 2, 4.5] as const;
 
 interface KineticBrandTitleProps {
   className?: string;
@@ -23,12 +24,12 @@ export function KineticBrandTitle({
   delay = 0.04,
   scrollProgress,
 }: KineticBrandTitleProps) {
-  const prefersReducedMotion = useReducedMotion();
+  const { prefersReducedMotion, allowParallax } = useMotionProfile();
   const isBehind = variant === 'behindSubject';
   const fallbackZero = useMotionValue(0);
   const activeScroll = scrollProgress ?? fallbackZero;
 
-  // Scroll-synchronized subtle horizontal letter spread & vertical tension
+  // Scroll-synchronized subtle horizontal letter spread, 3D turn & vertical tension
   const spread0 = useTransform(
     activeScroll,
     [0, 1],
@@ -54,8 +55,15 @@ export function KineticBrandTitle({
     [0, 1],
     [0, LETTER_SPREAD_OFFSETS[4]]
   );
+  const rot0 = useTransform(activeScroll, [0, 1], [0, LETTER_TILT_OFFSETS[0]]);
+  const rot1 = useTransform(activeScroll, [0, 1], [0, LETTER_TILT_OFFSETS[1]]);
+  const rot2 = useTransform(activeScroll, [0, 1], [0, LETTER_TILT_OFFSETS[2]]);
+  const rot3 = useTransform(activeScroll, [0, 1], [0, LETTER_TILT_OFFSETS[3]]);
+  const rot4 = useTransform(activeScroll, [0, 1], [0, LETTER_TILT_OFFSETS[4]]);
+
   const letterScaleY = useTransform(activeScroll, [0, 1], [1, 0.94]);
   const spreads = [spread0, spread1, spread2, spread3, spread4];
+  const rotations = [rot0, rot1, rot2, rot3, rot4];
 
   const containerClasses = isBehind
     ? `inline-flex items-baseline justify-center gap-[0.02em] sm:gap-[0.03em] select-none ${className}`
@@ -92,9 +100,10 @@ export function KineticBrandTitle({
           key={char}
           aria-hidden="true"
           style={
-            isBehind
+            isBehind && allowParallax
               ? {
                   x: spreads[idx],
+                  rotateY: rotations[idx],
                   scaleY: letterScaleY,
                 }
               : undefined
