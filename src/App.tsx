@@ -196,6 +196,17 @@ export default function App({
     updateMeta('meta[name="twitter:title"]', 'content', seo.title);
     updateMeta('meta[name="twitter:description"]', 'content', seo.description);
 
+    let jsonLdEl = document.querySelector(
+      'script[type="application/ld+json"][data-ermia-jsonld="true"]'
+    );
+    if (!jsonLdEl) {
+      jsonLdEl = document.createElement('script');
+      jsonLdEl.setAttribute('type', 'application/ld+json');
+      jsonLdEl.setAttribute('data-ermia-jsonld', 'true');
+      document.head.appendChild(jsonLdEl);
+    }
+    jsonLdEl.textContent = JSON.stringify(seo.jsonLdGraph);
+
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement('link');

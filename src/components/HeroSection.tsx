@@ -12,7 +12,6 @@ import { MOTION_EASE, ThemeMode } from '../styles/designTokens';
 import { HeroPortrait } from './HeroPortrait';
 import { MagneticButton } from './MagneticButton';
 import { staggerContainerVariants, staggerItemVariants } from './ScrollReveal';
-import { TextReveal } from './TextReveal';
 
 interface HeroSectionProps {
   locale: Locale;
@@ -102,41 +101,17 @@ export function HeroSection({
           style={prefersReducedMotion ? undefined : { y: copyScrollY }}
           className="mt-7 flex max-w-2xl flex-col items-center text-center sm:mt-8"
         >
-          <TextReveal
-            as="h1"
-            immediate
-            splitWords
-            delay={0.22}
-            className="font-display text-[clamp(2.2rem,4.9vw,3.85rem)] font-semibold leading-[1.05] tracking-tight text-[var(--ermia-text)] text-balance"
-          >
+          <h1 className="font-display text-[clamp(2.2rem,4.9vw,3.85rem)] font-semibold leading-[1.05] tracking-tight text-[var(--ermia-text)] text-balance">
             {content.fullName}
-          </TextReveal>
+          </h1>
 
-          <motion.p
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.56,
-              delay: 0.34,
-              ease: MOTION_EASE.cinematic,
-            }}
-            className="mt-2 font-display text-lg font-medium tracking-tight text-[var(--ermia-accent)] sm:text-2xl"
-          >
+          <p className="mt-2 font-display text-lg font-medium tracking-tight text-[var(--ermia-accent)] sm:text-2xl">
             {content.headline}
-          </motion.p>
+          </p>
 
-          <motion.p
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.64,
-              delay: 0.42,
-              ease: MOTION_EASE.cinematic,
-            }}
-            className="mt-3.5 max-w-xl text-sm leading-[1.75] text-[var(--ermia-text-secondary)] sm:text-base"
-          >
+          <p className="mt-3.5 max-w-xl text-sm leading-[1.75] text-[var(--ermia-text-secondary)] sm:text-base">
             {content.intro}
-          </motion.p>
+          </p>
 
           {/* Magnetic Navigation CTAs */}
           <motion.div

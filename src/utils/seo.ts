@@ -14,8 +14,16 @@ export interface SeoMetadata {
     hreflang: 'en' | 'fa' | 'x-default';
     href: string;
   }[];
-  jsonLdObjects: Record<string, unknown>[];
+  jsonLdGraph: Record<string, unknown>;
 }
+
+export const HOME_TITLE_EN = 'Ermia Yazdani | Personal Portfolio';
+export const HOME_DESC_EN =
+  'Official personal portfolio of Ermia Yazdani, featuring web development, technology experiments, personal projects, and FLOW.';
+
+export const HOME_TITLE_FA = 'ارمیا یزدانی | پورتفولیوی شخصی — Ermia Yazdani';
+export const HOME_DESC_FA =
+  'پورتفولیوی رسمی و شخصی ارمیا یزدانی (Ermia Yazdani)؛ شامل پروژه‌های شخصی، تجربه‌های فناوری، یادگیری توسعه وب و پروژه FLOW.';
 
 export function getSeoMetadata({
   route,
@@ -29,12 +37,16 @@ export function getSeoMetadata({
   siteUrlOverride?: string;
 }): SeoMetadata {
   const homeRootUrl = buildAbsoluteUrl('/', siteUrlOverride);
-  const homeEnUrl = buildAbsoluteUrl('/en/', siteUrlOverride);
   const homeFaUrl = buildAbsoluteUrl('/fa/', siteUrlOverride);
   const flowUrl = buildAbsoluteUrl('/projects/flow', siteUrlOverride);
   const ogImage = buildAbsoluteUrl(SITE_CONFIG.portraitPath, siteUrlOverride);
 
-  const canonicalUrl = buildAbsoluteUrl(canonicalPath, siteUrlOverride);
+  const normalizedCanonicalPath =
+    canonicalPath === '/en/' ? '/' : canonicalPath;
+  const canonicalUrl = buildAbsoluteUrl(
+    normalizedCanonicalPath,
+    siteUrlOverride
+  );
 
   const isFlow = route === 'flow';
   const isFa = locale === 'fa';
@@ -44,66 +56,52 @@ export function getSeoMetadata({
       ? 'FLOW — مطالعه موردی پروژه | ارمیا یزدانی (Ermia Yazdani)'
       : 'FLOW — Personal Daily-Life App Case Study | Ermia Yazdani'
     : isFa
-      ? 'ارمیا یزدانی | پورتفولیوی شخصی — Ermia Yazdani'
-      : 'Ermia Yazdani | Personal Portfolio';
+      ? HOME_TITLE_FA
+      : HOME_TITLE_EN;
 
   const description = isFlow
     ? isFa
       ? 'مطالعه موردی پروژه شخصی FLOW اثر ارمیا یزدانی؛ طراحی اپلیکیشن آرام زندگی روزمره، معماری سه‌لایه و مسیر یادگیری پایتون و HTML.'
       : 'Explore the FLOW case study by Ermia Yazdani—a calm personal daily-life app in active development, shaped by Python study and HTML basics.'
     : isFa
-      ? 'به پورتفولیوی شخصی ارمیا یزدانی (ERMIA) خوش آمدید. پروژه‌هایی مانند FLOW، مسیر یادگیری پایتون و HTML پایه، و علایق موسیقی و گیتار.'
-      : "Welcome to my personal portfolio. I'm Ermia Yazdani. Explore my projects like FLOW, creative interests in guitar & music, and Python/web learning journey.";
+      ? HOME_DESC_FA
+      : HOME_DESC_EN;
 
   const personId = `${homeRootUrl}#person`;
   const websiteId = `${homeRootUrl}#website`;
 
-  const personSchema = {
-    '@context': 'https://schema.org',
+  const personEntity = {
     '@type': 'Person',
     '@id': personId,
     name: SITE_CONFIG.fullName,
-    alternateName: ['Ermia', 'ERMIA', SITE_CONFIG.fullNameFa],
+    alternateName: 'ERMIA',
     url: homeRootUrl,
     image: ogImage,
     sameAs: [SITE_CONFIG.githubUrl],
-    description:
-      'Personal portfolio author sharing FLOW, Python & HTML learning progress, guitar practice, and honest project notes.',
+    description: HOME_DESC_EN,
     knowsAbout: [
-      'Python (Learning)',
+      'Web Development',
       'HTML Basics',
+      'Python (Learning)',
+      'Technology Experiments',
+      'FLOW Concept',
       'Guitar',
       'Music',
-      'FLOW Concept',
     ],
   };
 
-  const websiteSchema = {
-    '@context': 'https://schema.org',
+  const websiteEntity = {
     '@type': 'WebSite',
     '@id': websiteId,
     name: SITE_CONFIG.fullName,
-    alternateName: 'Ermia',
+    alternateName: 'ERMIA',
     url: homeRootUrl,
     inLanguage: ['en', 'fa'],
     publisher: { '@id': personId },
   };
 
-  const profilePageSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'ProfilePage',
-    '@id': `${canonicalUrl}#profilepage`,
-    name: title,
-    description,
-    url: canonicalUrl,
-    inLanguage: locale,
-    isPartOf: { '@id': websiteId },
-    mainEntity: { '@id': personId },
-  };
-
-  const flowCaseStudySchema = isFlow
+  const pageEntity = isFlow
     ? {
-        '@context': 'https://schema.org',
         '@type': 'CreativeWork',
         '@id': `${flowUrl}#casestudy`,
         name: 'FLOW — Personal Daily-Life Application Concept',
@@ -115,7 +113,21 @@ export function getSeoMetadata({
         isPartOf: { '@id': websiteId },
         creativeWorkStatus: 'In Development',
       }
-    : null;
+    : {
+        '@type': 'ProfilePage',
+        '@id': `${canonicalUrl}#profilepage`,
+        name: title,
+        description,
+        url: canonicalUrl,
+        inLanguage: locale,
+        isPartOf: { '@id': websiteId },
+        mainEntity: { '@id': personId },
+      };
+
+  const jsonLdGraph = {
+    '@context': 'https://schema.org',
+    '@graph': [websiteEntity, personEntity, pageEntity],
+  };
 
   const hreflangAlternates: SeoMetadata['hreflangAlternates'] = isFlow
     ? [
@@ -123,7 +135,7 @@ export function getSeoMetadata({
         { hreflang: 'x-default', href: flowUrl },
       ]
     : [
-        { hreflang: 'en', href: homeEnUrl },
+        { hreflang: 'en', href: homeRootUrl },
         { hreflang: 'fa', href: homeFaUrl },
         { hreflang: 'x-default', href: homeRootUrl },
       ];
@@ -137,9 +149,7 @@ export function getSeoMetadata({
     ogImage,
     ogType: isFlow ? 'article' : 'website',
     hreflangAlternates,
-    jsonLdObjects: flowCaseStudySchema
-      ? [websiteSchema, personSchema, profilePageSchema, flowCaseStudySchema]
-      : [websiteSchema, personSchema, profilePageSchema],
+    jsonLdGraph,
   };
 }
 
@@ -162,10 +172,7 @@ export function renderSeoHeadTags(meta: SeoMetadata): string {
       `<link rel="alternate" hreflang="${escapeHtmlAttr(alt.hreflang)}" href="${escapeHtmlAttr(alt.href)}" />`
   );
 
-  const jsonLdScripts = meta.jsonLdObjects.map(
-    (schema) =>
-      `<script type="application/ld+json" data-ermia-jsonld="true">${JSON.stringify(schema)}</script>`
-  );
+  const jsonLdScript = `<script type="application/ld+json" data-ermia-jsonld="true">${JSON.stringify(meta.jsonLdGraph)}</script>`;
 
   return [
     ...verificationMeta,
@@ -186,6 +193,6 @@ export function renderSeoHeadTags(meta: SeoMetadata): string {
     `<meta name="twitter:title" content="${escapeHtmlAttr(meta.title)}" />`,
     `<meta name="twitter:description" content="${escapeHtmlAttr(meta.description)}" />`,
     `<meta name="twitter:image" content="${escapeHtmlAttr(meta.ogImage)}" />`,
-    ...jsonLdScripts,
+    jsonLdScript,
   ].join('\n    ');
 }

@@ -22,7 +22,7 @@ export function parsePathname(pathname: string): ParsedRoute {
   }
 
   if (clean === '/en' || clean === '/en/') {
-    return { route: 'home', localeFromPath: 'en', canonicalPath: '/en/' };
+    return { route: 'home', localeFromPath: 'en', canonicalPath: '/' };
   }
 
   if (

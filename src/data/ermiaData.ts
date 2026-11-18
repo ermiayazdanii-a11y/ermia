@@ -323,7 +323,7 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       kicker: 'About Ermia',
       title: 'An honest look at who I am and why I build.',
       intro:
-        'I am Ermia. Programming is a relatively recent chapter in my life—I am currently learning Python, building on basic HTML, playing guitar, and shaping FLOW without exaggerated titles or invented claims.',
+        "I'm Ermia Yazdani. Programming is a relatively recent chapter in my life—I am currently learning Python, building on basic HTML, playing guitar, and shaping FLOW without exaggerated titles or invented claims.",
       githubCtaLabel: 'Follow on GitHub',
       pillars: [
         {
@@ -938,7 +938,7 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       kicker: 'درباره ارمیا',
       title: 'نگاهی صادقانه به اینکه کیستم و چرا به ساختن علاقه دارم.',
       intro:
-        'اینجا خبری از عناوین ساختگی یا ادعاهای اغراق‌آمیز نیست. ERMIA فضای دیجیتال شخصی من برای ثبت پیشرفت واقعی است؛ یادگیری پایتون، پایه HTML، نواختن گیتار و شکل‌دادن به ایده FLOW.',
+        'من ارمیا یزدانی هستم و اینجا خبری از عناوین ساختگی یا ادعاهای اغراق‌آمیز نیست. ERMIA فضای دیجیتال شخصی من برای ثبت پیشرفت واقعی است؛ یادگیری پایتون، پایه HTML، نواختن گیتار و شکل‌دادن به ایده FLOW.',
       githubCtaLabel: 'مشاهده در گیت‌هاب',
       pillars: [
         {

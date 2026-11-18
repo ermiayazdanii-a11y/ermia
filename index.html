@@ -8,13 +8,13 @@
     <meta name="google-site-verification" content="ZznoVNUGChbDMXH4Or0koQby6E3vwkP2o4AMwVUYDko" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://ermia-personal-portfolio.ai.studio/" />
-    <link rel="alternate" hreflang="en" href="https://ermia-personal-portfolio.ai.studio/en/" />
+    <link rel="alternate" hreflang="en" href="https://ermia-personal-portfolio.ai.studio/" />
     <link rel="alternate" hreflang="fa" href="https://ermia-personal-portfolio.ai.studio/fa/" />
     <link rel="alternate" hreflang="x-default" href="https://ermia-personal-portfolio.ai.studio/" />
     <title>Ermia Yazdani | Personal Portfolio</title>
     <meta
       name="description"
-      content="Welcome to my personal portfolio. I'm Ermia Yazdani. Explore my projects like FLOW, creative interests in guitar & music, and Python/web learning journey."
+      content="Official personal portfolio of Ermia Yazdani, featuring web development, technology experiments, personal projects, and FLOW."
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Ermia Yazdani" />
@@ -22,7 +22,7 @@
     <meta property="og:title" content="Ermia Yazdani | Personal Portfolio" />
     <meta
       property="og:description"
-      content="Welcome to my personal portfolio. I'm Ermia Yazdani. Explore my projects like FLOW, creative interests in guitar & music, and Python/web learning journey."
+      content="Official personal portfolio of Ermia Yazdani, featuring web development, technology experiments, personal projects, and FLOW."
     />
     <meta
       property="og:image"
@@ -34,7 +34,7 @@
     <meta name="twitter:title" content="Ermia Yazdani | Personal Portfolio" />
     <meta
       name="twitter:description"
-      content="Welcome to my personal portfolio. I'm Ermia Yazdani. Explore my projects like FLOW, creative interests in guitar & music, and Python/web learning journey."
+      content="Official personal portfolio of Ermia Yazdani, featuring web development, technology experiments, personal projects, and FLOW."
     />
     <meta
       name="twitter:image"
@@ -43,43 +43,52 @@
     <script type="application/ld+json" data-ermia-jsonld="true">
       {
         "@context": "https://schema.org",
-        "@type": "WebSite",
-        "@id": "https://ermia-personal-portfolio.ai.studio/#website",
-        "name": "Ermia Yazdani",
-        "alternateName": "Ermia",
-        "url": "https://ermia-personal-portfolio.ai.studio/",
-        "inLanguage": ["en", "fa"]
-      }
-    </script>
-    <script type="application/ld+json" data-ermia-jsonld="true">
-      {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "@id": "https://ermia-personal-portfolio.ai.studio/#person",
-        "name": "Ermia Yazdani",
-        "alternateName": ["Ermia", "ERMIA", "ارمیا یزدانی"],
-        "url": "https://ermia-personal-portfolio.ai.studio/",
-        "image": "https://ermia-personal-portfolio.ai.studio/images/ermia-portrait.jpg",
-        "sameAs": ["https://github.com/ermiayazdanii-a11y"],
-        "knowsAbout": [
-          "Python (Learning)",
-          "HTML Basics",
-          "Guitar",
-          "Music",
-          "FLOW Concept"
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://ermia-personal-portfolio.ai.studio/#website",
+            "name": "Ermia Yazdani",
+            "alternateName": "ERMIA",
+            "url": "https://ermia-personal-portfolio.ai.studio/",
+            "inLanguage": ["en", "fa"],
+            "publisher": {
+              "@id": "https://ermia-personal-portfolio.ai.studio/#person"
+            }
+          },
+          {
+            "@type": "Person",
+            "@id": "https://ermia-personal-portfolio.ai.studio/#person",
+            "name": "Ermia Yazdani",
+            "alternateName": "ERMIA",
+            "url": "https://ermia-personal-portfolio.ai.studio/",
+            "image": "https://ermia-personal-portfolio.ai.studio/images/ermia-portrait.jpg",
+            "sameAs": ["https://github.com/ermiayazdanii-a11y"],
+            "description": "Official personal portfolio of Ermia Yazdani, featuring web development, technology experiments, personal projects, and FLOW.",
+            "knowsAbout": [
+              "Web Development",
+              "HTML Basics",
+              "Python (Learning)",
+              "Technology Experiments",
+              "FLOW Concept",
+              "Guitar",
+              "Music"
+            ]
+          },
+          {
+            "@type": "ProfilePage",
+            "@id": "https://ermia-personal-portfolio.ai.studio/#profilepage",
+            "name": "Ermia Yazdani | Personal Portfolio",
+            "description": "Official personal portfolio of Ermia Yazdani, featuring web development, technology experiments, personal projects, and FLOW.",
+            "url": "https://ermia-personal-portfolio.ai.studio/",
+            "inLanguage": "en",
+            "isPartOf": {
+              "@id": "https://ermia-personal-portfolio.ai.studio/#website"
+            },
+            "mainEntity": {
+              "@id": "https://ermia-personal-portfolio.ai.studio/#person"
+            }
+          }
         ]
-      }
-    </script>
-    <script type="application/ld+json" data-ermia-jsonld="true">
-      {
-        "@context": "https://schema.org",
-        "@type": "ProfilePage",
-        "@id": "https://ermia-personal-portfolio.ai.studio/#profilepage",
-        "name": "Ermia Yazdani | Personal Portfolio",
-        "url": "https://ermia-personal-portfolio.ai.studio/",
-        "mainEntity": {
-          "@id": "https://ermia-personal-portfolio.ai.studio/#person"
-        }
       }
     </script>
     <!--ermia-seo-head-end-->

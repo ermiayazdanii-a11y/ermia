@@ -113,7 +113,7 @@ async function run() {
     }
   }
 
-  // Generate sitemap.xml matching single-source-of-truth URLs
+  // Generate sitemap.xml matching unique canonical URLs only
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset
   xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -121,23 +121,15 @@ async function run() {
 >
   <url>
     <loc>${cleanBase}/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="${cleanBase}/en/" />
+    <xhtml:link rel="alternate" hreflang="en" href="${cleanBase}/" />
     <xhtml:link rel="alternate" hreflang="fa" href="${cleanBase}/fa/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${cleanBase}/" />
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>${cleanBase}/en/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="${cleanBase}/en/" />
-    <xhtml:link rel="alternate" hreflang="fa" href="${cleanBase}/fa/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${cleanBase}/" />
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>${cleanBase}/fa/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="${cleanBase}/en/" />
+    <xhtml:link rel="alternate" hreflang="en" href="${cleanBase}/" />
     <xhtml:link rel="alternate" hreflang="fa" href="${cleanBase}/fa/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${cleanBase}/" />
     <changefreq>weekly</changefreq>
