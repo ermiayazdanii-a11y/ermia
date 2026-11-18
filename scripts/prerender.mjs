@@ -121,19 +121,19 @@ async function run() {
 >
   <url>
     <loc>${cleanBase}/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="${cleanBase}/" />
     <xhtml:link rel="alternate" hreflang="fa" href="${cleanBase}/fa/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${cleanBase}/" />
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
   </url>
   <url>
     <loc>${cleanBase}/fa/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="${cleanBase}/" />
     <xhtml:link rel="alternate" hreflang="fa" href="${cleanBase}/fa/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${cleanBase}/" />
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
   </url>
   <url>
     <loc>${cleanBase}/projects/flow</loc>
