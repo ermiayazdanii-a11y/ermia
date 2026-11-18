@@ -93,95 +93,129 @@ export interface JournalEntry {
 }
 
 export interface ErmiaLocaleContent {
-  nav: {
-    home: string;
-    about: string;
-    journey: string;
-    projects: string;
-    skills: string;
-    journal: string;
-    contact: string;
-    toggleLangLabel: string;
-    themeLightLabel: string;
-    themeDarkLabel: string;
-  };
-  hero: {
-    kicker: string;
-    fullName: string;
-    headline: string;
-    intro: string;
-    journeyCta: string;
-    projectsCta: string;
-    portraitAlt: string;
-    marqueeItems: string[];
-    highlights: {
-      label: string;
-      value: string;
-    }[];
-  };
-  about: {
-    kicker: string;
-    title: string;
-    intro: string;
-    githubCtaLabel: string;
-    pillars: {
-      index: string;
-      heading: string;
-      body: string;
-    }[];
-  };
-  journey: {
-    kicker: string;
-    title: string;
-    subtitle: string;
-    jumpLabel: string;
-    allMilestonesLabel: string;
-    turningPointsLabel: string;
-    startLabel: string;
-    highlightBadge: string;
-    whyItMattersLabel: string;
-    milestones: JourneyMilestone[];
-    summaryTitle: string;
-    summaryItems: {
-      label: string;
-      value: string;
-    }[];
-  };
-  projects: {
-    kicker: string;
-    title: string;
-    subtitle: string;
-    tabs: {
-      overview: string;
-      concept: string;
-      progress: string;
-      lessons: string;
+    nav: {
+      home: string;
+      about: string;
+      journey: string;
+      projects: string;
+      skills: string;
+      journal: string;
+      contact: string;
+      caseStudyCta: string;
+      toggleLangLabel: string;
+      themeLightLabel: string;
+      themeDarkLabel: string;
     };
-    purposeLabel: string;
-    conceptLabel: string;
-    designLabel: string;
-    featuresLabel: string;
-    progressLabel: string;
-    techLabel: string;
-    galleryLabel: string;
-    galleryEmptyTitle: string;
-    galleryEmptyBody: string;
-    conceptPreviewLabel: string;
-    conceptLayerHint: string;
-    stageLabels: {
-      implemented: string;
-      planned: string;
-      conceptual: string;
+    hero: {
+      kicker: string;
+      fullName: string;
+      headline: string;
+      intro: string;
+      journeyCta: string;
+      projectsCta: string;
+      portraitAlt: string;
+      marqueeItems: string[];
+      highlights: {
+        label: string;
+        value: string;
+      }[];
     };
-    comparisonHeaders: {
-      aspect: string;
-      earlier: string;
-      flow: string;
+    about: {
+      kicker: string;
+      title: string;
+      intro: string;
+      githubCtaLabel: string;
+      pillars: {
+        index: string;
+        heading: string;
+        body: string;
+      }[];
     };
-    featured: ProjectCaseStudy;
-    futureNoteTitle: string;
-    futureNoteBody: string;
-  };
+    journey: {
+      kicker: string;
+      title: string;
+      subtitle: string;
+      jumpLabel: string;
+      allMilestonesLabel: string;
+      turningPointsLabel: string;
+      startLabel: string;
+      highlightBadge: string;
+      whyItMattersLabel: string;
+      milestones: JourneyMilestone[];
+      summaryTitle: string;
+      summaryItems: {
+        label: string;
+        value: string;
+      }[];
+    };
+    projects: {
+      kicker: string;
+      title: string;
+      subtitle: string;
+      tabs: {
+        overview: string;
+        concept: string;
+        progress: string;
+        architecture: string;
+      };
+      purposeLabel: string;
+      conceptLabel: string;
+      designLabel: string;
+      featuresLabel: string;
+      progressLabel: string;
+      techLabel: string;
+      devStateLabel: string;
+      devStateTitle: string;
+      devStateBody: string;
+      devStateBadge: string;
+      devStatePillars: {
+        index: string;
+        title: string;
+        stage: 'implemented' | 'planned' | 'conceptual';
+        detail: string;
+      }[];
+      openCaseStudyLabel: string;
+      conceptPreviewLabel: string;
+      conceptLayerHint: string;
+      stageLabels: {
+        implemented: string;
+        planned: string;
+        conceptual: string;
+      };
+      comparisonHeaders: {
+        aspect: string;
+        earlier: string;
+        flow: string;
+      };
+      featured: ProjectCaseStudy;
+      futureNoteTitle: string;
+      futureNoteBody: string;
+      caseStudyPage: {
+        backToPortfolio: string;
+        breadcrumbCurrent: string;
+        pageKicker: string;
+        pageTitle: string;
+        pageLead: string;
+        architectureHeading: string;
+        layers: {
+          number: string;
+          name: string;
+          stage: 'implemented' | 'planned' | 'conceptual';
+          role: string;
+          summary: string;
+          details: string[];
+        }[];
+        designPrinciplesHeading: string;
+        designPrinciples: {
+          title: string;
+          body: string;
+        }[];
+        statusNoteTitle: string;
+        statusNoteBody: string;
+        nextChapterLabel: string;
+        nextChapterCta: string;
+      };
+    };
   skills: {
     kicker: string;
     title: string;
@@ -255,6 +289,7 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       skills: 'Skills',
       journal: 'Journal',
       contact: 'Contact',
+      caseStudyCta: 'FLOW Study',
       toggleLangLabel: 'فارسی',
       themeLightLabel: 'Switch to light theme',
       themeDarkLabel: 'Switch to dark theme',
@@ -425,7 +460,7 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
         overview: 'Purpose & Intro',
         concept: 'Concept & Design',
         progress: 'Progress & Tech',
-        lessons: 'Past Experiments vs. FLOW',
+        architecture: 'Development State',
       },
       purposeLabel: 'Why I Started FLOW',
       conceptLabel: 'Main Concept',
@@ -433,10 +468,35 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       featuresLabel: 'Planned & Explored Features',
       progressLabel: 'Honest Development Progress',
       techLabel: 'Confirmed Technology & Study Alignment',
-      galleryLabel: 'Application Screenshots',
-      galleryEmptyTitle: 'Screenshots Pending Upload',
-      galleryEmptyBody:
-        'No real FLOW application screenshots have been provided yet. Authentic captures will appear in this interactive gallery once attached—no fabricated UI screenshots are shown here.',
+      devStateLabel: 'Active Development Snapshot',
+      devStateTitle: 'In Active Development · Unreleased Concept Architecture',
+      devStateBody:
+        'FLOW is currently focused on daily structure and foundational Python logic before public UI capture. Every module below distinguishes clearly between implemented architecture decisions, planned builds, and early-stage concepts.',
+      devStateBadge: 'Pre-Release Build',
+      devStatePillars: [
+        {
+          index: '01',
+          title: 'Three-Layer Daily Cadence',
+          stage: 'implemented',
+          detail:
+            'Concept model settled: Priorities, Practice Blocks, and Evening Reflection inside one non-noisy routine.',
+        },
+        {
+          index: '02',
+          title: 'Python Core Logic & Data Shape',
+          stage: 'planned',
+          detail:
+            'Currently translating Python study exercises into clean, predictable task state and habit persistence.',
+        },
+        {
+          index: '03',
+          title: 'Focused Interface Capture',
+          stage: 'conceptual',
+          detail:
+            'Authentic screen captures will publish here once the interactive daily view reaches working prototype milestones.',
+        },
+      ],
+      openCaseStudyLabel: 'Open Dedicated FLOW Case Study',
       conceptPreviewLabel: 'FLOW · Interactive Concept Preview (Unreleased)',
       conceptLayerHint: 'Select any layer to inspect its daily role.',
       stageLabels: {
@@ -555,9 +615,79 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
         ],
         screenshots: [],
       },
-      futureNoteTitle: 'Future Projects Space',
+      futureNoteTitle: 'Why Honesty Drives the Roadmap',
       futureNoteBody:
-        'This section is designed to grow honestly over time—additional showcases will only be added when real screenshots and confirmed project milestones are ready.',
+        'Every additional project or build preview enters this space only after core logic runs reliably—prioritizing clarity and genuine progress over rushing features.',
+      caseStudyPage: {
+        backToPortfolio: 'Back to Portfolio',
+        breadcrumbCurrent: 'FLOW Case Study',
+        pageKicker: 'Project Case Study · Unreleased Concept',
+        pageTitle: 'FLOW — Designing a calmer daily-life tool from scratch.',
+        pageLead:
+          'FLOW grew directly out of earlier app experiments that tried to do too much too soon. Here is the complete thinking behind its three-layer structure, honest engineering progress, and visual direction.',
+        architectureHeading: 'Three-Layer Daily Concept Architecture',
+        layers: [
+          {
+            number: '01',
+            name: 'Morning Focus & Priorities',
+            stage: 'conceptual',
+            role: 'Quiet Daily Anchor',
+            summary:
+              'Highlight only one to three concrete priorities for the day without buried subfolders or noisy badge counters.',
+            details: [
+              'Designed to keep morning check-ins under two minutes',
+              'Clear distinction between non-negotiable focus and optional notes',
+              'No aggressive overdue counters designed to create stress',
+            ],
+          },
+          {
+            number: '02',
+            name: 'Deliberate Practice Blocks',
+            stage: 'planned',
+            role: 'Steady Skill Habit',
+            summary:
+              'Simple session blocks dedicated to recurring practice such as Python fundamentals, HTML structure, or guitar rehearsal.',
+            details: [
+              'Tracks consistency rather than gamified streak pressure',
+              'Built to pair directly with Python script logic in active study',
+              'Calm low-glare surface tuned for long focus sessions',
+            ],
+          },
+          {
+            number: '03',
+            name: 'Evening Closing Reflection',
+            stage: 'implemented',
+            role: 'Mindful Closure',
+            summary:
+              'Brief closing prompts asking what actually moved forward today and what can stay simpler tomorrow.',
+            details: [
+              'Core structural specification settled from journal learnings',
+              'Transforms finished days into clear context for the next morning',
+              'Zero cluttered analytics charts or fabricated productivity scores',
+            ],
+          },
+        ],
+        designPrinciplesHeading: 'Visual & Ergonomic Restraint',
+        designPrinciples: [
+          {
+            title: 'Obsidian & Paper Comfort',
+            body: 'Engineered with deep obsidian dark tones for evening desk comfort and crisp warm-paper daylight contrast so returning to the app feels calm.',
+          },
+          {
+            title: 'Bilingual LTR / RTL Symmetry',
+            body: 'Every rhythm, alignment, and typographic scale is shaped to support both English and Persian seamlessly without broken spacing.',
+          },
+          {
+            title: 'Earn Every Screen State',
+            body: 'No fabricated dashboards or rushed visual fluff—interface views grow strictly in step with real underlying Python logic.',
+          },
+        ],
+        statusNoteTitle: 'Where FLOW Stands Right Now',
+        statusNoteBody:
+          'FLOW is not released yet. Building it honestly means practicing Python fundamentals step by step, keeping HTML & UI structure disciplined, and sharing authentic captures once live screens are complete.',
+        nextChapterLabel: 'Continue Exploring',
+        nextChapterCta: 'Read Learning Journal & Contact',
+      },
     },
     skills: {
       kicker: 'Learning, Skills & Interests',
@@ -774,6 +904,7 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       skills: 'مهارت‌ها',
       journal: 'ژورنال',
       contact: 'تماس',
+      caseStudyCta: 'پروژه FLOW',
       toggleLangLabel: 'EN',
       themeLightLabel: 'تغییر به حالت روشن',
       themeDarkLabel: 'تغییر به حالت تیره',
@@ -944,7 +1075,7 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
         overview: 'معرفی و هدف',
         concept: 'مفهوم و طراحی',
         progress: 'پیشرفت و فناوری',
-        lessons: 'مقایسه با تجربه‌های قبلی',
+        architecture: 'وضعیت توسعه',
       },
       purposeLabel: 'چرا FLOW را شروع کردم',
       conceptLabel: 'ایده محوری',
@@ -952,10 +1083,35 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
       featuresLabel: 'قابلیت‌های در حال طراحی و بررسی',
       progressLabel: 'وضعیت واقعی توسعه',
       techLabel: 'فناوری‌ها و مسیر یادگیری مرتبط',
-      galleryLabel: 'اسکرین‌شات‌های اپلیکیشن',
-      galleryEmptyTitle: 'اسکرین‌شات‌ها هنوز پیوست نشده‌اند',
-      galleryEmptyBody:
-        'تا این لحظه تصویر واقعی از محیط برنامه FLOW پیوست نشده است. به‌محض افزوده شدن اسکرین‌شات‌های واقعی، این گالری آن‌ها را نمایش خواهد داد—از تصاویر ساختگی استفاده نشده است.',
+      devStateLabel: 'نمای صادقانه توسعه',
+      devStateTitle: 'در حال توسعه فعال · معماری مفهومی پیش از انتشار',
+      devStateBody:
+        'تمرکز فعلی FLOW بر شکل‌دهی منطق پایه با پایتون و ساختار آرام روزانه پیش از ثبت نماهای نهایی است. بخش‌های زیر به‌وضوح میان تصمیم‌های نهایی‌شده، برنامه‌ریزی‌شده و مفاهیم اولیه تفکیک قائل می‌شوند.',
+      devStateBadge: 'نسخه پیش از انتشار',
+      devStatePillars: [
+        {
+          index: '۰۱',
+          title: 'ریتم سه‌لایه روزانه',
+          stage: 'implemented',
+          detail:
+            'ساختار مفهومی نهایی‌شده: اولویت‌های روز، بلوک‌های تمرین آرام و مرور پایان روز در یک مسیر خلوت.',
+        },
+        {
+          index: '۰۲',
+          title: 'منطق پایتون و مدل داده',
+          stage: 'planned',
+          detail:
+            'در حال تبدیل تمرین‌های پایتون به منطق تمیز برای نگهداری وضعیت کارهای روزانه و تمرین‌ها.',
+        },
+        {
+          index: '۰۳',
+          title: 'ثبت رابط کاربری واقعی',
+          stage: 'conceptual',
+          detail:
+            'تصاویر واقعی از محیط نرم‌افزار زمانی اینجا منتشر می‌شوند که نمونه تعاملی به ثبات کامل برسد.',
+        },
+      ],
+      openCaseStudyLabel: 'مطالعه صفحه کامل پروژه FLOW',
       conceptPreviewLabel: 'FLOW · پیش‌نمایش تعاملی مفهوم (منتشرنشده)',
       conceptLayerHint: 'روی هر لایه کلیک کنید تا نقش روزانه آن را ببینید.',
       stageLabels: {
@@ -1074,9 +1230,79 @@ export const ERMIA_CONTENT: Record<Locale, ErmiaLocaleContent> = {
         ],
         screenshots: [],
       },
-      futureNoteTitle: 'فضای پروژه‌های آینده',
+      futureNoteTitle: 'چرا شفافیت مسیر را هدایت می‌کند',
       futureNoteBody:
-        'ساختار این بخش طوری طراحی شده که پروژه‌های جدید فقط پس از آماده شدن تصاویر و دستاوردهای واقعی به آن اضافه شوند، بدون ساخت پروژه‌های فرضی.',
+        'پروژه‌ها و تصاویر جدید فقط زمانی به این فضا اضافه می‌شوند که منطق اصلی آن‌ها به‌درستی کار کند؛ اولویت با کیفیت و یادگیری واقعی است نه عجله.',
+      caseStudyPage: {
+        backToPortfolio: 'بازگشت به پورتفولیو',
+        breadcrumbCurrent: 'مطالعه موردی FLOW',
+        pageKicker: 'مطالعه موردی پروژه · در حال توسعه',
+        pageTitle: 'FLOW — طراحی یک ابزار آرام روزمره از پایه.',
+        pageLead:
+          'ایده FLOW مستقیماً از درس‌های آزمایش‌های قبلی شکل گرفت؛ تجربه‌هایی که خیلی زود سراغ شلوغی رفته بودند. در این صفحه، ساختار سه‌لایه، مسیر فنی واقعی و جهت‌گیری طراحی آن را می‌خوانید.',
+        architectureHeading: 'معماری مفهومی سه‌لایه روزانه',
+        layers: [
+          {
+            number: '۰۱',
+            name: 'تمرکز صبحگاهی و اولویت‌ها',
+            stage: 'conceptual',
+            role: 'لنگر آرام روز',
+            summary:
+              'برجسته‌کردن فقط یک تا سه کار کلیدی امروز، بدون پوشه‌های تو در تو یا عددهای اضطراب‌آور.',
+            details: [
+              'طراحی‌شده برای مرور صبحگاهی کمتر از دو دقیقه',
+              'تفکیک روشن میان کارهای اصلی روز و یادداشت‌های جانبی',
+              'بدون شمارنده‌های استرس‌زا برای کارهای عقب‌افتاده',
+            ],
+          },
+          {
+            number: '۰۲',
+            name: 'بلوک‌های تمرین آگاهانه',
+            stage: 'planned',
+            role: 'عادت یادگیری پیوسته',
+            summary:
+              'بخش‌های ساده برای پیگیری تمرین‌های مستمر مانند پایتون، ساختار وب یا تمرین گیتار.',
+            details: [
+              'تمرکز بر تداوم واقعی به جای امتیازهای نمایشی',
+              'هم‌سو با منطق کدنویسی پایتون در مسیر یادگیری فعلی',
+              'رابط کم‌نور و راحت برای تمرکز طولانی',
+            ],
+          },
+          {
+            number: '۰۳',
+            name: 'مرور آرام پایان روز',
+            stage: 'implemented',
+            role: 'بستن آگاهانه روز',
+            summary:
+              'پرسش‌های کوتاه شبانه درباره اینکه امروز چه چیزی پیش رفت و فردا را چطور ساده‌تر کنیم.',
+            details: [
+              'طرح ساختاری بر پایه تجربه‌های ثبت‌شده در ژورنال نهایی شده است',
+              'تبدیل پایان روز به نقطه شروع شفاف برای صبح فردا',
+              'پرهیز از نمودارهای شلوغ و درصدهای ساختگی بهره‌وری',
+            ],
+          },
+        ],
+        designPrinciplesHeading: 'انضباط بصری و راحتی کاربری',
+        designPrinciples: [
+          {
+            title: 'آرامش بصری در تاریکی و روز',
+            body: 'پالت ابسیدین عمیق برای استفاده شبانه و کنتراست کاغذ روشن برای روز، تا بازگشت روزانه به برنامه خسته‌کننده نباشد.',
+          },
+          {
+            title: 'هماهنگی کامل دوزبانه (RTL / LTR)',
+            body: 'فاصله‌گذاری، سلسله‌مراتب تایپوگرافی و چیدمان برای پشتیبانی هم‌زمان از فارسی و انگلیسی بدون بهم‌ریختگی طراحی شده است.',
+          },
+          {
+            title: 'رشد هم‌قدم با کد واقعی',
+            body: 'هیچ تصویر یا صفحه نمایشی ساختگی وجود ندارد؛ رابط کاربری قدم‌به‌قدم همراه با منطق پایتون تکامل می‌یابد.',
+          },
+        ],
+        statusNoteTitle: 'جایگاه فعلی پروژه FLOW',
+        statusNoteBody:
+          'این پروژه هنوز منتشر نشده است. پیشرفت واقعی یعنی تمرین منظم پایتون، محکم‌کردن پایه وب و انتشار تصاویر واقعی زمانی که هسته برنامه به بلوغ برسد.',
+        nextChapterLabel: 'ادامه مطالعه',
+        nextChapterCta: 'مشاهده ژورنال یادگیری و تماس',
+      },
     },
     skills: {
       kicker: 'یادگیری، مهارت‌ها و علایق',

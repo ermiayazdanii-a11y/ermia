@@ -69,7 +69,7 @@ export function ProjectStackCard({
                 opacity,
               }
         }
-        className="origin-top will-change-transform"
+        className="origin-top"
       >
         <InteractiveProjectCard
           theme={theme}

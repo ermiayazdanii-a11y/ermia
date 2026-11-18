@@ -183,21 +183,21 @@ export function HeroPortrait({
         initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.94 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.95, ease: MOTION_EASE.cinematic }}
-        className="pointer-events-none absolute inset-x-4 top-2 bottom-0 -z-10 overflow-hidden rounded-t-[28px] border-x border-t border-[var(--ermia-border)]/70 will-change-transform sm:inset-x-8"
+        className="pointer-events-none absolute inset-x-4 top-2 bottom-0 -z-10 overflow-hidden rounded-t-[28px] border-x border-t border-[var(--ermia-border)]/75 sm:inset-x-8"
       >
         {/* Subtle studio vignette surface */}
         <div
           className="absolute inset-0"
           style={{
             background: isDark
-              ? 'radial-gradient(ellipse 72% 78% at 50% 42%, rgba(23, 27, 22, 0.72) 0%, rgba(9, 12, 9, 0.18) 65%, transparent 100%)'
-              : 'radial-gradient(ellipse 72% 78% at 50% 42%, rgba(255, 255, 255, 0.78) 0%, rgba(234, 237, 223, 0.25) 65%, transparent 100%)',
+              ? 'radial-gradient(ellipse 74% 80% at 50% 42%, rgba(23, 27, 22, 0.78) 0%, rgba(9, 12, 9, 0.22) 66%, transparent 100%)'
+              : 'radial-gradient(ellipse 74% 80% at 50% 42%, rgba(255, 255, 255, 0.82) 0%, rgba(234, 237, 223, 0.28) 66%, transparent 100%)',
           }}
         />
 
         {/* Warm solar-amber rim light echoing the sun reflection inside Ermia's sunglasses */}
         <div
-          className="animate-ambient-a absolute left-1/2 top-[12%] h-[220px] w-[260px] -translate-x-1/2 rounded-full blur-2xl sm:h-[290px] sm:w-[360px]"
+          className="animate-ambient-a absolute left-1/2 top-[12%] h-[220px] w-[260px] -translate-x-1/2 rounded-full opacity-90 blur-xl sm:h-[290px] sm:w-[360px] sm:blur-2xl"
           style={{
             background: isDark
               ? 'radial-gradient(circle at 58% 36%, rgba(245, 166, 35, 0.16) 0%, rgba(var(--ermia-spotlight-rgb), 0.19) 42%, transparent 74%)'
@@ -223,11 +223,11 @@ export function HeroPortrait({
                 transformStyle: 'preserve-3d',
               }
         }
-        className="pointer-events-none absolute inset-x-0 top-[46%] z-10 flex -translate-y-1/2 items-center justify-center will-change-transform sm:top-[44%]"
+        className="pointer-events-none absolute inset-x-0 top-[46%] z-10 flex -translate-y-1/2 items-center justify-center sm:top-[44%]"
       >
         <KineticBrandTitle
           variant="behindSubject"
-          delay={0.06}
+          delay={0.05}
           scrollProgress={activeScroll}
         />
       </motion.div>
@@ -239,10 +239,9 @@ export function HeroPortrait({
             ? false
             : {
                 opacity: 0,
-                scale: 1.07,
-                y: 26,
-                clipPath: 'inset(14% 0% 100% 0%)',
-                filter: 'blur(6px)',
+                scale: 1.05,
+                y: 22,
+                clipPath: 'inset(12% 0% 100% 0%)',
               }
         }
         animate={{
@@ -250,11 +249,10 @@ export function HeroPortrait({
           scale: 1,
           y: 0,
           clipPath: 'inset(0% 0% 0% 0%)',
-          filter: 'blur(0px)',
         }}
         transition={{
-          duration: MOTION_TIMING.cinematic + 0.12,
-          delay: 0.12,
+          duration: MOTION_TIMING.cinematic + 0.08,
+          delay: 0.1,
           ease: MOTION_EASE.cinematic,
         }}
         style={
@@ -270,7 +268,7 @@ export function HeroPortrait({
                 transformStyle: 'preserve-3d',
               }
         }
-        className="relative z-20 flex h-[222px] w-[222px] items-end justify-center will-change-transform sm:h-[292px] sm:w-[292px] lg:h-[346px] lg:w-[346px]"
+        className="relative z-20 flex h-[222px] w-[222px] items-end justify-center sm:h-[292px] sm:w-[292px] lg:h-[346px] lg:w-[346px]"
       >
         {fallbackStep < 3 ? (
           <img

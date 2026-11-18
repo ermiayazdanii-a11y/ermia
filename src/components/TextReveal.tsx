@@ -38,7 +38,6 @@ function KineticScrollWrapper({ children }: KineticScrollWrapperProps) {
     <motion.div
       ref={kineticRef}
       style={{ y: kineticY, skewX: kineticSkewX }}
-      className="will-change-transform"
     >
       {children}
     </motion.div>
@@ -72,7 +71,7 @@ export function TextReveal({
               className="inline-block overflow-hidden align-bottom"
             >
               <motion.span
-                className="inline-block will-change-transform"
+                className="inline-block"
                 initial={{
                   y: '110%',
                   opacity: 0,
@@ -112,7 +111,6 @@ export function TextReveal({
     return (
       <div className="overflow-hidden">
         <motion.div
-          className="will-change-transform"
           initial={{
             y: '100%',
             opacity: 0,

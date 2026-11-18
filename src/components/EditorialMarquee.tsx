@@ -27,20 +27,20 @@ export function EditorialMarquee({ items }: EditorialMarqueeProps) {
         className="relative overflow-hidden py-4 sm:py-5 cursor-pointer"
       >
         {/* Edge fades into theme canvas */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[var(--ermia-bg)] to-transparent sm:w-24" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[var(--ermia-bg)] to-transparent sm:w-24" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[var(--ermia-bg-secondary)] to-transparent sm:w-24" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[var(--ermia-bg-secondary)] to-transparent sm:w-24" />
 
         <div
           dir="ltr"
           style={isPaused ? { animationPlayState: 'paused' } : undefined}
-          className="flex w-max animate-marquee items-center gap-6 will-change-transform"
+          className="flex w-max animate-marquee items-center gap-6"
         >
           {repeatedItems.map((word, index) => (
             <div key={`${word}-${index}`} className="flex items-center gap-6 shrink-0">
               <span className="font-display text-xs font-medium tracking-[0.22em] text-[var(--ermia-text-secondary)] transition-colors duration-200 hover:text-[var(--ermia-accent)] sm:text-sm">
                 {word}
               </span>
-              <span className="text-xs text-[var(--ermia-accent)]">/</span>
+              <span className="text-xs text-[var(--ermia-accent)]">·</span>
             </div>
           ))}
         </div>

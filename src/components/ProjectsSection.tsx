@@ -2,12 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLenis } from 'lenis/react';
 import {
+  ArrowUpLeft,
+  ArrowUpRight,
   Check,
   CheckCircle2,
   CircleDot,
   Clock3,
   Compass,
-  Image as ImageIcon,
+  Layers,
   Maximize2,
   Minus,
   X,
@@ -16,6 +18,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   ErmiaLocaleContent,
   FlowScreenshot,
+  Locale,
   MEDIA_ASSETS,
 } from '../data/ermiaData';
 import { useModalFocusTrap } from '../hooks/useModalFocusTrap';
@@ -28,24 +31,31 @@ import { ScrollReveal } from './ScrollReveal';
 import { TextReveal } from './TextReveal';
 
 interface ProjectsSectionProps {
+  locale: Locale;
   theme: ThemeMode;
   content: ErmiaLocaleContent['projects'];
+  onOpenCaseStudy: () => void;
 }
 
 type FlowChapterId =
   | 'project-card-overview'
   | 'project-card-concept'
   | 'project-card-progress'
-  | 'project-card-gallery';
+  | 'project-card-architecture';
 
 const FLOW_CHAPTER_IDS: FlowChapterId[] = [
   'project-card-overview',
   'project-card-concept',
   'project-card-progress',
-  'project-card-gallery',
+  'project-card-architecture',
 ];
 
-export function ProjectsSection({ theme, content }: ProjectsSectionProps) {
+export function ProjectsSection({
+  locale,
+  theme,
+  content,
+  onOpenCaseStudy,
+}: ProjectsSectionProps) {
   const [activeChapter, setActiveChapter] = useState<FlowChapterId>(
     'project-card-overview'
   );
@@ -60,6 +70,7 @@ export function ProjectsSection({ theme, content }: ProjectsSectionProps) {
   const project = content.featured;
   const activeFeature =
     project.features[activeConceptIdx] ?? project.features[0];
+  const StudyArrow = locale === 'fa' ? ArrowUpLeft : ArrowUpRight;
 
   const chapters = useMemo<{ id: FlowChapterId; num: string; label: string }[]>(
     () => [
@@ -68,16 +79,19 @@ export function ProjectsSection({ theme, content }: ProjectsSectionProps) {
       {
         id: 'project-card-progress',
         num: '03',
-        label: `${content.tabs.progress} · ${content.tabs.lessons}`,
+        label: content.tabs.progress,
       },
-      { id: 'project-card-gallery', num: '04', label: content.galleryLabel },
+      {
+        id: 'project-card-architecture',
+        num: '04',
+        label: content.tabs.architecture,
+      },
     ],
     [
       content.tabs.overview,
       content.tabs.concept,
       content.tabs.progress,
-      content.tabs.lessons,
-      content.galleryLabel,
+      content.tabs.architecture,
     ]
   );
 
@@ -225,7 +239,7 @@ export function ProjectsSection({ theme, content }: ProjectsSectionProps) {
         </LiquidImageTrail>
 
         {/* Accessible Quick-Jump Chapter Strip for Sticky Sequence */}
-        <div className="mt-10 rounded-2xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)]/90 p-2.5 backdrop-blur-md">
+        <div className="mt-10 flex flex-col gap-3 rounded-2xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)]/90 p-2.5 backdrop-blur-md lg:flex-row lg:items-center lg:justify-between">
           <nav
             aria-label="FLOW Project Stack Navigation"
             className="flex items-center gap-1.5 overflow-x-auto"
@@ -264,6 +278,18 @@ export function ProjectsSection({ theme, content }: ProjectsSectionProps) {
               );
             })}
           </nav>
+
+          <a
+            href="/projects/flow"
+            onClick={(e) => {
+              e.preventDefault();
+              onOpenCaseStudy();
+            }}
+            className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border border-[var(--ermia-border-strong)] bg-[var(--ermia-bg)] px-4 py-2 text-xs font-medium text-[var(--ermia-accent)] whitespace-nowrap shrink-0 transition-colors duration-150 hover:border-[var(--ermia-accent)] hover:bg-[var(--ermia-accent)] hover:text-[var(--ermia-accent-contrast)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)]"
+          >
+            <span>{content.openCaseStudyLabel}</span>
+            <StudyArrow className="h-3.5 w-3.5" strokeWidth={2} />
+          </a>
         </div>
 
         {/* Cinematic Sticky Project Stack (4 Preserved FLOW Chapters) */}
@@ -516,9 +542,7 @@ export function ProjectsSection({ theme, content }: ProjectsSectionProps) {
                     03
                   </span>
                   <span aria-hidden="true">·</span>
-                  <span>
-                    {content.tabs.progress} · {content.tabs.lessons}
-                  </span>
+                  <span>{content.tabs.progress}</span>
                 </div>
                 <span className="font-mono text-xs text-[var(--ermia-muted)]">
                   FLOW
@@ -617,24 +641,24 @@ export function ProjectsSection({ theme, content }: ProjectsSectionProps) {
             </div>
           </ProjectStackCard>
 
-          {/* STACK CARD 04: Authentic Screenshot Gallery (with CRT Preview Effect) & Future Projects */}
+          {/* STACK CARD 04: Authentic Development State Showcase & Dedicated Case Study CTA */}
           <ProjectStackCard
-            id="project-card-gallery"
+            id="project-card-architecture"
             index={3}
             total={4}
             theme={theme}
           >
             <div className="p-6 sm:p-8">
-              <div className="flex items-center justify-between gap-4 border-b border-[var(--ermia-border)] pb-4">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--ermia-border)] pb-4">
                 <div className="flex items-center gap-2.5 text-xs font-medium text-[var(--ermia-accent)]">
                   <span className="font-mono tabular-nums text-[var(--ermia-muted)]">
                     04
                   </span>
                   <span aria-hidden="true">·</span>
-                  <span>{content.galleryLabel}</span>
+                  <span>{content.devStateLabel}</span>
                 </div>
                 <span className="font-mono text-xs text-[var(--ermia-muted)]">
-                  FLOW
+                  {content.devStateBadge}
                 </span>
               </div>
 
@@ -674,25 +698,65 @@ export function ProjectsSection({ theme, content }: ProjectsSectionProps) {
                   ))}
                 </div>
               ) : (
-                <CrtDigitalPreview className="mt-6 rounded-xl border border-dashed border-[var(--ermia-border)] bg-[var(--ermia-bg)] p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)] text-[var(--ermia-accent)]">
-                      <ImageIcon className="h-5 w-5" strokeWidth={1.6} />
-                    </div>
-                    <div>
-                      <p className="font-display text-sm font-medium text-[var(--ermia-text)]">
-                        {content.galleryEmptyTitle}
+                <CrtDigitalPreview className="mt-6 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg)] p-5 sm:p-6">
+                  <div className="flex flex-col justify-between gap-6 border-b border-[var(--ermia-border)] pb-5 md:flex-row md:items-end">
+                    <div className="max-w-2xl">
+                      <div className="flex items-center gap-2 text-xs font-medium text-[var(--ermia-accent)]">
+                        <Layers className="h-4 w-4" strokeWidth={1.75} />
+                        <span>FLOW · {content.tabs.architecture}</span>
+                      </div>
+                      <h4 className="mt-2 font-display text-xl font-semibold tracking-tight text-[var(--ermia-text)] sm:text-2xl">
+                        {content.devStateTitle}
+                      </h4>
+                      <p className="mt-2 text-xs leading-relaxed text-[var(--ermia-text-secondary)] sm:text-sm">
+                        {content.devStateBody}
                       </p>
-                      <p className="mt-1 text-xs leading-relaxed text-[var(--ermia-text-secondary)] sm:text-sm">
-                        {content.galleryEmptyBody}
-                      </p>
                     </div>
+
+                    <a
+                      href="/projects/flow"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onOpenCaseStudy();
+                      }}
+                      className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-[var(--ermia-accent)] px-5 py-2.5 text-xs font-semibold text-[var(--ermia-accent-contrast)] whitespace-nowrap shrink-0 shadow-[0_12px_28px_-12px_rgba(var(--ermia-spotlight-rgb),0.45)] transition-colors duration-150 hover:bg-[var(--ermia-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)]"
+                    >
+                      <span>{content.openCaseStudyLabel}</span>
+                      <StudyArrow className="h-4 w-4" strokeWidth={2} />
+                    </a>
+                  </div>
+
+                  <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {content.devStatePillars.map((pillar) => (
+                      <div
+                        key={pillar.index}
+                        className="flex flex-col justify-between rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-surface)] p-4"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-2 text-xs">
+                            <span className="font-mono tabular-nums text-[var(--ermia-accent)]">
+                              {pillar.index}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 font-medium text-[var(--ermia-text-secondary)]">
+                              {renderStageIcon(pillar.stage)}
+                              <span>{content.stageLabels[pillar.stage]}</span>
+                            </span>
+                          </div>
+                          <h5 className="mt-3 font-display text-base font-medium text-[var(--ermia-text)]">
+                            {pillar.title}
+                          </h5>
+                          <p className="mt-1.5 text-xs leading-relaxed text-[var(--ermia-text-secondary)]">
+                            {pillar.detail}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </CrtDigitalPreview>
               )}
 
-              {/* Honest Future Projects Note */}
-              <div className="mt-6 rounded-xl border border-dashed border-[var(--ermia-border-strong)] bg-[var(--ermia-bg-secondary)]/80 p-5">
+              {/* Honest Roadmap Note */}
+              <div className="mt-6 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/85 p-5">
                 <p className="text-xs font-medium text-[var(--ermia-accent)]">
                   {content.futureNoteTitle}
                 </p>

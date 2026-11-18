@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr" data-route="home">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--ermia-seo-head-start-->
     <meta name="google-site-verification" content="1MIHamZfnu8ZaOwys2FycuR1lvnD1EVdrnUKmGvuUnI" />
     <meta name="google-site-verification" content="ZznoVNUGChbDMXH4Or0koQby6E3vwkP2o4AMwVUYDko" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://ermia-personal-portfolio.ai.studio/" />
-    <link rel="icon" href="/favicon.ico" sizes="48x48" />
-    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="alternate" hreflang="en" href="https://ermia-personal-portfolio.ai.studio/en/" />
+    <link rel="alternate" hreflang="fa" href="https://ermia-personal-portfolio.ai.studio/fa/" />
+    <link rel="alternate" hreflang="x-default" href="https://ermia-personal-portfolio.ai.studio/" />
     <title>Ermia Yazdani | Personal Portfolio</title>
     <meta
       name="description"
@@ -40,6 +40,53 @@
       name="twitter:image"
       content="https://ermia-personal-portfolio.ai.studio/images/ermia-portrait.jpg"
     />
+    <script type="application/ld+json" data-ermia-jsonld="true">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://ermia-personal-portfolio.ai.studio/#website",
+        "name": "Ermia Yazdani",
+        "alternateName": "Ermia",
+        "url": "https://ermia-personal-portfolio.ai.studio/",
+        "inLanguage": ["en", "fa"]
+      }
+    </script>
+    <script type="application/ld+json" data-ermia-jsonld="true">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "@id": "https://ermia-personal-portfolio.ai.studio/#person",
+        "name": "Ermia Yazdani",
+        "alternateName": ["Ermia", "ERMIA", "ارمیا یزدانی"],
+        "url": "https://ermia-personal-portfolio.ai.studio/",
+        "image": "https://ermia-personal-portfolio.ai.studio/images/ermia-portrait.jpg",
+        "sameAs": ["https://github.com/ermiayazdanii-a11y"],
+        "knowsAbout": [
+          "Python (Learning)",
+          "HTML Basics",
+          "Guitar",
+          "Music",
+          "FLOW Concept"
+        ]
+      }
+    </script>
+    <script type="application/ld+json" data-ermia-jsonld="true">
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "@id": "https://ermia-personal-portfolio.ai.studio/#profilepage",
+        "name": "Ermia Yazdani | Personal Portfolio",
+        "url": "https://ermia-personal-portfolio.ai.studio/",
+        "mainEntity": {
+          "@id": "https://ermia-personal-portfolio.ai.studio/#person"
+        }
+      }
+    </script>
+    <!--ermia-seo-head-end-->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#090C09" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#F4F5EF" media="(prefers-color-scheme: light)" />
     <!-- Prevent theme flash before first paint while honoring system preference & persisted manual choice -->
@@ -59,33 +106,6 @@
           document.documentElement.classList.add('dark');
         }
       })();
-    </script>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Ermia Yazdani",
-        "alternateName": "Ermia",
-        "url": "https://ermia-personal-portfolio.ai.studio/"
-      }
-    </script>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Ermia Yazdani",
-        "alternateName": "Ermia",
-        "url": "https://ermia-personal-portfolio.ai.studio/",
-        "image": "https://ermia-personal-portfolio.ai.studio/images/ermia-portrait.jpg",
-        "sameAs": ["https://github.com/ermiayazdanii-a11y"],
-        "knowsAbout": [
-          "Python (Learning)",
-          "HTML Basics",
-          "Guitar",
-          "Music",
-          "FLOW Concept"
-        ]
-      }
     </script>
   </head>
   <body class="bg-[var(--ermia-bg)] text-[var(--ermia-text)] antialiased selection:bg-[var(--ermia-accent)]/25 selection:text-[var(--ermia-text)]">

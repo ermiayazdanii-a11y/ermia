@@ -92,9 +92,9 @@ export function AmbientBackground() {
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
     >
-      {/* Base architectural coordinate hairline grid with gentle pointer drift */}
+      {/* Base architectural coordinate hairline grid with gentle desktop pointer drift */}
       <motion.div
-        className="absolute -inset-3 will-change-transform"
+        className="absolute -inset-3"
         style={{
           x: isFinePointer && !prefersReducedMotion ? gridShiftX : 0,
           y: isFinePointer && !prefersReducedMotion ? gridShiftY : 0,
@@ -111,7 +111,7 @@ export function AmbientBackground() {
       {/* Living Grid Accent Lens: illuminates grid intersections near fine desktop pointer */}
       {isFinePointer && !prefersReducedMotion && (
         <motion.div
-          className="absolute -inset-3 will-change-transform"
+          className="absolute -inset-3"
           style={{
             x: gridShiftX,
             y: gridShiftY,
@@ -127,34 +127,25 @@ export function AmbientBackground() {
 
       {/* Upper subtle accent atmospheric canopy */}
       <div
-        className="animate-ambient-a absolute -top-56 left-1/2 h-[680px] w-[1040px] -translate-x-1/2 rounded-full opacity-80 will-change-transform"
+        className="animate-ambient-a absolute -top-56 left-1/2 h-[640px] w-[960px] -translate-x-1/2 rounded-full opacity-75"
         style={{
           background:
-            'radial-gradient(ellipse at center, rgba(var(--ermia-spotlight-rgb), 0.085) 0%, rgba(var(--ermia-spotlight-rgb), 0.025) 44%, transparent 72%)',
+            'radial-gradient(ellipse at center, rgba(var(--ermia-spotlight-rgb), 0.08) 0%, rgba(var(--ermia-spotlight-rgb), 0.022) 44%, transparent 72%)',
         }}
       />
 
-      {/* Lower left subtle secondary drift */}
+      {/* Lower secondary drift (desktop only) */}
       <div
-        className="animate-ambient-b absolute -bottom-48 -left-36 h-[560px] w-[760px] rounded-full opacity-70 will-change-transform"
+        className="animate-ambient-b hidden md:block absolute -bottom-48 -left-36 h-[520px] w-[700px] rounded-full opacity-65"
         style={{
           background:
-            'radial-gradient(ellipse at center, rgba(var(--ermia-spotlight-rgb), 0.055) 0%, rgba(var(--ermia-spotlight-rgb), 0.015) 45%, transparent 74%)',
+            'radial-gradient(ellipse at center, rgba(var(--ermia-spotlight-rgb), 0.05) 0%, rgba(var(--ermia-spotlight-rgb), 0.015) 45%, transparent 74%)',
         }}
       />
 
-      {/* Mid-page right soft atmospheric balance */}
+      {/* Ultra-fine tactile grain overlay on desktop viewports only */}
       <div
-        className="animate-ambient-a absolute top-[45%] -right-44 h-[520px] w-[520px] rounded-full opacity-60 will-change-transform"
-        style={{
-          background:
-            'radial-gradient(circle at center, rgba(var(--ermia-spotlight-rgb), 0.045) 0%, transparent 72%)',
-        }}
-      />
-
-      {/* Ultra-fine tactile grain overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.022] dark:opacity-[0.028]"
+        className="hidden md:block absolute inset-0 opacity-[0.02] dark:opacity-[0.025]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
           backgroundRepeat: 'repeat',

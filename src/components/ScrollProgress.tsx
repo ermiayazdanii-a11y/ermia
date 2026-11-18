@@ -12,6 +12,7 @@ interface ScrollProgressProps {
   locale: Locale;
   activeSection: string;
   sectionLabels: Record<string, string>;
+  showSectionBadge?: boolean;
 }
 
 const SECTION_ORDER = [
@@ -29,6 +30,7 @@ export function ScrollProgress({
   locale,
   activeSection,
   sectionLabels,
+  showSectionBadge = true,
 }: ScrollProgressProps) {
   const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
@@ -59,34 +61,36 @@ export function ScrollProgress({
       </div>
 
       {/* Restrained desktop current-section index indicator */}
-      <aside
-        aria-label={locale === 'fa' ? 'بخش فعال صفحه' : 'Current section indicator'}
-        className={`pointer-events-none fixed bottom-6 z-30 hidden xl:flex items-center gap-2.5 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/85 px-3.5 py-2 backdrop-blur-md ${
-          locale === 'fa' ? 'left-6' : 'right-6'
-        }`}
-      >
-        <span className="font-mono text-[11px] tabular-nums text-[var(--ermia-accent)]">
-          {indexFormatted}
-          <span className="text-[var(--ermia-muted)]"> / {totalFormatted}</span>
-        </span>
-        <span aria-hidden="true" className="text-[var(--ermia-muted)]">
-          ·
-        </span>
-        <div className="relative min-w-[72px] overflow-hidden">
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={activeSection}
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={prefersReducedMotion ? undefined : { opacity: 0, y: -6 }}
-              transition={{ duration: 0.2, ease: MOTION_EASE.cinematic }}
-              className="block text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap"
-            >
-              {currentLabel}
-            </motion.span>
-          </AnimatePresence>
-        </div>
-      </aside>
+      {showSectionBadge && (
+        <aside
+          aria-label={locale === 'fa' ? 'بخش فعال صفحه' : 'Current section indicator'}
+          className={`pointer-events-none fixed bottom-6 z-30 hidden xl:flex items-center gap-2.5 rounded-xl border border-[var(--ermia-border)] bg-[var(--ermia-bg-secondary)]/85 px-3.5 py-2 backdrop-blur-md ${
+            locale === 'fa' ? 'left-6' : 'right-6'
+          }`}
+        >
+          <span className="font-mono text-[11px] tabular-nums text-[var(--ermia-accent)]">
+            {indexFormatted}
+            <span className="text-[var(--ermia-muted)]"> / {totalFormatted}</span>
+          </span>
+          <span aria-hidden="true" className="text-[var(--ermia-muted)]">
+            ·
+          </span>
+          <div className="relative min-w-[72px] overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={activeSection}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -6 }}
+                transition={{ duration: 0.2, ease: MOTION_EASE.cinematic }}
+                className="block text-xs font-medium text-[var(--ermia-text)] whitespace-nowrap"
+              >
+                {currentLabel}
+              </motion.span>
+            </AnimatePresence>
+          </div>
+        </aside>
+      )}
     </>
   );
 }

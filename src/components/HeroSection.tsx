@@ -66,15 +66,15 @@ export function HeroSection({
               initial={
                 prefersReducedMotion
                   ? false
-                  : { opacity: 0, y: 4, filter: 'blur(4px)' }
+                  : { opacity: 0, y: 4 }
               }
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              animate={{ opacity: 1, y: 0 }}
               exit={
                 prefersReducedMotion
                   ? undefined
-                  : { opacity: 0, y: -4, filter: 'blur(4px)' }
+                  : { opacity: 0, y: -4 }
               }
-              transition={{ duration: 0.24, ease: MOTION_EASE.cinematic }}
+              transition={{ duration: 0.22, ease: MOTION_EASE.cinematic }}
               className="inline-block"
             >
               {morphActive ? altKicker : content.kicker}
@@ -100,14 +100,14 @@ export function HeroSection({
         {/* Semantic H1 (Ermia Yazdani), Visual Subtitle (Ideas Become Reality) & Introduction */}
         <motion.div
           style={prefersReducedMotion ? undefined : { y: copyScrollY }}
-          className="mt-7 flex max-w-2xl flex-col items-center text-center will-change-transform sm:mt-8"
+          className="mt-7 flex max-w-2xl flex-col items-center text-center sm:mt-8"
         >
           <TextReveal
             as="h1"
             immediate
             splitWords
             delay={0.22}
-            className="font-display text-[clamp(2.15rem,4.8vw,3.75rem)] font-semibold leading-[1.06] tracking-tight text-[var(--ermia-text)] text-balance"
+            className="font-display text-[clamp(2.2rem,4.9vw,3.85rem)] font-semibold leading-[1.05] tracking-tight text-[var(--ermia-text)] text-balance"
           >
             {content.fullName}
           </TextReveal>

@@ -21,6 +21,7 @@ interface TodayAndContactSectionProps {
   contactContent: ErmiaLocaleContent['contact'];
   navContent: ErmiaLocaleContent['nav'];
   onNavigate: (sectionId: string) => void;
+  onOpenFlowCaseStudy: () => void;
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -32,6 +33,7 @@ export function TodayAndContactSection({
   contactContent,
   navContent,
   onNavigate,
+  onOpenFlowCaseStudy,
 }: TodayAndContactSectionProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -433,6 +435,18 @@ export function TodayAndContactSection({
                     </a>
                   </li>
                 ))}
+                <li>
+                  <a
+                    href="/projects/flow"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onOpenFlowCaseStudy();
+                    }}
+                    className="font-medium text-[var(--ermia-accent)] transition-opacity duration-150 hover:opacity-80"
+                  >
+                    {navContent.caseStudyCta}
+                  </a>
+                </li>
               </ul>
             </div>
 

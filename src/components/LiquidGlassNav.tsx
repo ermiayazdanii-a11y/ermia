@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Globe, Menu, Moon, Sun, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Globe, Menu, Moon, Sun, X } from 'lucide-react';
 import {
   AnimatePresence,
   motion,
@@ -14,14 +14,17 @@ import {
   SPRING_CONFIG,
   ThemeMode,
 } from '../styles/designTokens';
+import type { AppRoute } from '../utils/routing';
 import { ErmiaWordmark } from './ErmiaWordmark';
 
 interface LiquidGlassNavProps {
   locale: Locale;
   theme: ThemeMode;
+  currentRoute: AppRoute;
   content: ErmiaLocaleContent['nav'];
   activeSection: string;
   onNavigate: (sectionId: string) => void;
+  onOpenFlowCaseStudy: () => void;
   onToggleLocale: () => void;
   onToggleTheme: () => void;
 }
@@ -29,9 +32,11 @@ interface LiquidGlassNavProps {
 export function LiquidGlassNav({
   locale,
   theme,
+  currentRoute,
   content,
   activeSection,
   onNavigate,
+  onOpenFlowCaseStudy,
   onToggleLocale,
   onToggleTheme,
 }: LiquidGlassNavProps) {
@@ -107,21 +112,30 @@ export function LiquidGlassNav({
     glassOpacity.set(0);
   };
 
+  const homeBaseHref = locale === 'fa' ? '/fa/' : '/';
+  const BackArrow = locale === 'fa' ? ArrowRight : ArrowLeft;
+
   return (
     <motion.header
       initial={prefersReducedMotion ? false : { opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.62, ease: MOTION_EASE.cinematic }}
+      transition={{ duration: 0.56, ease: MOTION_EASE.cinematic }}
       className="fixed inset-x-0 top-0 z-40 px-3 pt-[max(0.625rem,env(safe-area-inset-top))] sm:px-6 sm:pt-3.5"
     >
       <div
         ref={barRef}
         onPointerMove={handleGlassMove}
         onPointerLeave={handleGlassLeave}
-        className={`relative mx-auto flex max-w-5xl items-center justify-between gap-3 overflow-hidden rounded-2xl px-3.5 py-2 transition-all duration-300 sm:gap-8 sm:px-5 ${
+        className={`relative mx-auto flex max-w-5xl items-center justify-between gap-3 overflow-hidden rounded-2xl px-3.5 py-2 transition-all duration-300 sm:gap-6 sm:px-5 ${
           isScrolled ? 'liquid-glass-scrolled' : 'liquid-glass'
         }`}
       >
+        {/* Top specular refraction highlight hairline */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[var(--ermia-glass-edge)] to-transparent opacity-70"
+        />
+
         {/* Subtle cursor-reactive refraction shimmer */}
         {!prefersReducedMotion && (
           <motion.div
@@ -133,9 +147,13 @@ export function LiquidGlassNav({
 
         {/* Zone 1: Slim ERMIA Wordmark */}
         <a
-          href="#home"
+          href={currentRoute === 'flow' ? homeBaseHref : '#home'}
           aria-label={`${content.home} — ERMIA`}
-          aria-current={activeSection === 'home' ? 'location' : undefined}
+          aria-current={
+            currentRoute === 'home' && activeSection === 'home'
+              ? 'location'
+              : undefined
+          }
           onClick={(e) => {
             e.preventDefault();
             handleLinkClick('home');
@@ -150,35 +168,76 @@ export function LiquidGlassNav({
           aria-label="Primary Navigation"
           className="relative z-10 hidden items-center gap-4 lg:flex xl:gap-6"
         >
-          {navItems.map((item) => {
-            const isActive = activeSection === item.id;
-            return (
+          {currentRoute === 'flow' ? (
+            <>
               <a
-                key={item.id}
-                href={`#${item.id}`}
-                aria-current={isActive ? 'location' : undefined}
+                href={homeBaseHref}
                 onClick={(e) => {
                   e.preventDefault();
-                  handleLinkClick(item.id);
+                  handleLinkClick('home');
                 }}
-                className={`relative py-1.5 text-[13px] font-medium whitespace-nowrap shrink-0 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] ${
-                  isActive
-                    ? 'text-[var(--ermia-text)]'
-                    : 'text-[var(--ermia-text-secondary)] hover:text-[var(--ermia-text)]'
-                }`}
+                className="inline-flex items-center gap-1.5 py-1.5 text-[13px] font-medium text-[var(--ermia-text-secondary)] whitespace-nowrap shrink-0 transition-colors duration-150 hover:text-[var(--ermia-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)]"
               >
-                {item.label}
-                {isActive && (
-                  <motion.span
-                    layoutId="nav-active-underline"
-                    aria-hidden="true"
-                    transition={SPRING_CONFIG.tabPill}
-                    className="absolute inset-x-0 -bottom-0.5 h-[1.5px] rounded-full bg-[var(--ermia-accent)]"
-                  />
-                )}
+                <BackArrow className="h-3.5 w-3.5" strokeWidth={1.75} />
+                <span>{content.home}</span>
               </a>
-            );
-          })}
+              <a
+                href="/projects/flow"
+                aria-current="page"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onOpenFlowCaseStudy();
+                }}
+                className="relative py-1.5 text-[13px] font-medium text-[var(--ermia-text)] whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)]"
+              >
+                {content.caseStudyCta}
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 -bottom-0.5 h-[1.5px] rounded-full bg-[var(--ermia-accent)]"
+                />
+              </a>
+              <a
+                href={`${homeBaseHref}#contact`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('contact');
+                }}
+                className="py-1.5 text-[13px] font-medium text-[var(--ermia-text-secondary)] whitespace-nowrap shrink-0 transition-colors duration-150 hover:text-[var(--ermia-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)]"
+              >
+                {content.contact}
+              </a>
+            </>
+          ) : (
+            navItems.map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  aria-current={isActive ? 'location' : undefined}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLinkClick(item.id);
+                  }}
+                  className={`relative py-1.5 text-[13px] font-medium whitespace-nowrap shrink-0 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ermia-accent)] ${
+                    isActive
+                      ? 'text-[var(--ermia-text)]'
+                      : 'text-[var(--ermia-text-secondary)] hover:text-[var(--ermia-text)]'
+                  }`}
+                >
+                  {item.label}
+                  {isActive && (
+                    <motion.span
+                      layoutId="nav-active-underline"
+                      aria-hidden="true"
+                      transition={SPRING_CONFIG.tabPill}
+                      className="absolute inset-x-0 -bottom-0.5 h-[1.5px] rounded-full bg-[var(--ermia-accent)]"
+                    />
+                  )}
+                </a>
+              );
+            })
+          )}
         </nav>
 
         {/* Zone 3: Theme Toggle + Language Switcher + Mobile Menu Toggle */}
@@ -226,7 +285,7 @@ export function LiquidGlassNav({
         </div>
       </div>
 
-      {/* Animated Mobile Liquid Glass Drawer with Staggered Entrances */}
+      {/* Animated Mobile Liquid Glass Drawer with >= 44px Touch Targets */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -241,25 +300,26 @@ export function LiquidGlassNav({
                 ? undefined
                 : { opacity: 0, y: -8, scale: 0.985 }
             }
-            transition={{ duration: 0.24, ease: MOTION_EASE.cinematic }}
+            transition={{ duration: 0.22, ease: MOTION_EASE.cinematic }}
             className="liquid-glass-scrolled mx-auto mt-2 max-w-5xl rounded-2xl p-3 lg:hidden"
           >
             <nav aria-label="Mobile Navigation" className="flex flex-col gap-1">
               {[{ id: 'home', label: content.home }, ...navItems].map(
                 (item, idx) => {
-                  const isActive = activeSection === item.id;
+                  const isActive =
+                    currentRoute === 'home' && activeSection === item.id;
                   return (
                     <motion.a
                       key={item.id}
-                      href={`#${item.id}`}
+                      href={`${homeBaseHref}#${item.id}`}
                       aria-current={isActive ? 'location' : undefined}
                       initial={
                         prefersReducedMotion ? false : { opacity: 0, x: -6 }
                       }
                       animate={{ opacity: 1, x: 0 }}
                       transition={{
-                        duration: 0.22,
-                        delay: prefersReducedMotion ? 0 : idx * 0.035,
+                        duration: 0.2,
+                        delay: prefersReducedMotion ? 0 : idx * 0.03,
                         ease: MOTION_EASE.cinematic,
                       }}
                       onClick={(e) => {
@@ -277,6 +337,23 @@ export function LiquidGlassNav({
                   );
                 }
               )}
+              <a
+                href="/projects/flow"
+                aria-current={currentRoute === 'flow' ? 'page' : undefined}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMobileMenuOpen(false);
+                  onOpenFlowCaseStudy();
+                }}
+                className={`mt-1 flex min-h-[44px] items-center justify-between rounded-xl border border-[var(--ermia-border)] px-3.5 py-2 text-sm font-medium transition-colors ${
+                  currentRoute === 'flow'
+                    ? 'border-[var(--ermia-accent)]/60 bg-[var(--ermia-accent)]/12 text-[var(--ermia-accent)]'
+                    : 'text-[var(--ermia-accent)] hover:bg-[var(--ermia-bg-secondary)]/60'
+                }`}
+              >
+                <span>{content.caseStudyCta}</span>
+                <span className="font-mono text-xs">/projects/flow</span>
+              </a>
             </nav>
           </motion.div>
         )}

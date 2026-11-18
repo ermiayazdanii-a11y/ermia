@@ -62,8 +62,8 @@ export function KineticBrandTitle({
     : `inline-flex items-baseline gap-1 sm:gap-1.5 select-none ${className}`;
 
   const glyphClasses = isBehind
-    ? 'inline-block font-display text-[clamp(3.55rem,20.2vw,11.75rem)] font-bold leading-[0.86] tracking-[0.03em] bg-gradient-to-b from-[var(--ermia-text)] via-[var(--ermia-text)] to-[var(--ermia-text-secondary)] bg-clip-text text-transparent drop-shadow-[0_14px_32px_rgba(0,0,0,0.22)] will-change-transform'
-    : 'inline-block font-display text-[clamp(2.65rem,7.2vw,5.25rem)] font-bold leading-[0.94] tracking-[0.06em] text-[var(--ermia-text)] transition-colors duration-150 will-change-transform';
+    ? 'inline-block font-display text-[clamp(3.55rem,20.2vw,11.75rem)] font-bold leading-[0.86] tracking-[0.03em] bg-gradient-to-b from-[var(--ermia-text)] via-[var(--ermia-text)] to-[var(--ermia-text-secondary)] bg-clip-text text-transparent drop-shadow-[0_14px_32px_rgba(0,0,0,0.22)]'
+    : 'inline-block font-display text-[clamp(2.65rem,7.2vw,5.25rem)] font-bold leading-[0.94] tracking-[0.06em] text-[var(--ermia-text)] transition-colors duration-150';
 
   if (prefersReducedMotion) {
     return (
@@ -99,20 +99,16 @@ export function KineticBrandTitle({
                 }
               : undefined
           }
-          className={`inline-block overflow-hidden ${isBehind ? 'px-[0.015em] py-2 will-change-transform' : 'py-1'}`}
+          className={`inline-block overflow-hidden ${isBehind ? 'px-[0.015em] py-2' : 'py-1'}`}
         >
           <motion.span
             initial={{
-              y: '112%',
+              y: '108%',
               opacity: 0,
-              rotateX: 28,
-              filter: 'blur(6px)',
             }}
             animate={{
               y: '0%',
               opacity: 1,
-              rotateX: 0,
-              filter: 'blur(0px)',
             }}
             whileHover={
               isBehind
@@ -124,8 +120,8 @@ export function KineticBrandTitle({
                   }
             }
             transition={{
-              duration: isBehind ? 0.86 : 0.78,
-              delay: delay + idx * 0.06,
+              duration: isBehind ? 0.78 : 0.7,
+              delay: delay + idx * 0.055,
               ease: MOTION_EASE.cinematic,
             }}
             className={glyphClasses}

@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ComponentType,
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { LenisRef, ReactLenis } from 'lenis/react';
 import { cancelFrame, frame, useReducedMotion } from 'motion/react';
 import { AboutSection } from './components/AboutSection';
@@ -14,24 +22,60 @@ import { ProjectsSection } from './components/ProjectsSection';
 import { ScrollProgress } from './components/ScrollProgress';
 import { SkillsInterestsSection } from './components/SkillsInterestsSection';
 import { TodayAndContactSection } from './components/TodayAndContactSection';
-import { SITE_CONFIG } from './config/siteConfig';
-import { ERMIA_CONTENT, Locale } from './data/ermiaData';
+import { ERMIA_CONTENT, ErmiaLocaleContent, Locale } from './data/ermiaData';
 import { LENIS_CONFIG, ThemeMode } from './styles/designTokens';
+import {
+  AppRoute,
+  getRoutePath,
+  parsePathname,
+} from './utils/routing';
+import { getSeoMetadata } from './utils/seo';
+
+const LazyFlowCaseStudyPage = lazy(() => import('./components/FlowCaseStudyPage'));
 
 const THEME_STORAGE_KEY = 'ermia-theme';
 const LOCALE_STORAGE_KEY = 'ermia-locale';
 
-function getInitialLocale(): Locale {
-  if (typeof window === 'undefined') return 'en';
-  try {
-    const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
-    if (stored === 'en' || stored === 'fa') {
-      return stored;
-    }
-  } catch {
-    // Ignore storage read errors and fall back to English default
+export interface FlowCaseStudyComponentProps {
+  locale: Locale;
+  theme: ThemeMode;
+  projectsContent: ErmiaLocaleContent['projects'];
+  navContent: ErmiaLocaleContent['nav'];
+  onNavigateHome: (sectionId?: string) => void;
+}
+
+export interface AppProps {
+  initialRoute?: AppRoute;
+  initialLocale?: Locale;
+  initialCanonicalPath?: '/' | '/en/' | '/fa/' | '/projects/flow';
+  FlowPageComponent?: ComponentType<FlowCaseStudyComponentProps>;
+}
+
+function getClientInitialNavigation() {
+  if (typeof window === 'undefined') {
+    return {
+      route: 'home' as AppRoute,
+      locale: 'en' as Locale,
+      canonicalPath: '/' as const,
+    };
   }
-  return 'en';
+  const parsed = parsePathname(window.location.pathname);
+  let resolvedLocale: Locale = parsed.localeFromPath ?? 'en';
+  if (parsed.localeFromPath === null) {
+    try {
+      const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
+      if (stored === 'en' || stored === 'fa') {
+        resolvedLocale = stored;
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }
+  return {
+    route: parsed.route,
+    locale: resolvedLocale,
+    canonicalPath: parsed.canonicalPath,
+  };
 }
 
 function getInitialTheme(): ThemeMode {
@@ -49,8 +93,20 @@ function getInitialTheme(): ThemeMode {
   }
 }
 
-export default function App() {
-  const [locale, setLocale] = useState<Locale>(getInitialLocale);
+export default function App({
+  initialRoute,
+  initialLocale,
+  initialCanonicalPath,
+  FlowPageComponent,
+}: AppProps = {}) {
+  const clientNav = getClientInitialNavigation();
+  const [route, setRoute] = useState<AppRoute>(initialRoute ?? clientNav.route);
+  const [canonicalPath, setCanonicalPath] = useState<
+    '/' | '/en/' | '/fa/' | '/projects/flow'
+  >(initialCanonicalPath ?? clientNav.canonicalPath);
+  const [locale, setLocale] = useState<Locale>(
+    initialLocale ?? clientNav.locale
+  );
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
   const [activeSection, setActiveSection] = useState('home');
   const lenisRef = useRef<LenisRef | null>(null);
@@ -97,6 +153,69 @@ export default function App() {
     return () => media.removeEventListener('change', onSystemChange);
   }, []);
 
+  // Browser back/forward navigation support
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onPopState = () => {
+      const parsed = parsePathname(window.location.pathname);
+      setRoute(parsed.route);
+      setCanonicalPath(parsed.canonicalPath);
+      if (parsed.localeFromPath) {
+        setLocale(parsed.localeFromPath);
+      }
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  // Keep HTML lang, dir, title, description, canonical, hreflang, and OpenGraph synced across routes & locales
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    document.documentElement.dir = locale === 'fa' ? 'rtl' : 'ltr';
+    document.documentElement.dataset.route = route;
+
+    const seo = getSeoMetadata({ route, locale, canonicalPath });
+    document.title = seo.title;
+
+    const updateMeta = (selector: string, attr: string, value: string) => {
+      const el = document.querySelector(selector);
+      if (el) el.setAttribute(attr, value);
+    };
+
+    updateMeta('meta[name="description"]', 'content', seo.description);
+    updateMeta('meta[property="og:type"]', 'content', seo.ogType);
+    updateMeta('meta[property="og:url"]', 'content', seo.canonicalUrl);
+    updateMeta('meta[property="og:title"]', 'content', seo.title);
+    updateMeta('meta[property="og:description"]', 'content', seo.description);
+    updateMeta('meta[property="og:locale"]', 'content', seo.ogLocale);
+    updateMeta(
+      'meta[property="og:locale:alternate"]',
+      'content',
+      seo.ogLocaleAlternate
+    );
+    updateMeta('meta[name="twitter:title"]', 'content', seo.title);
+    updateMeta('meta[name="twitter:description"]', 'content', seo.description);
+
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', seo.canonicalUrl);
+
+    document
+      .querySelectorAll('link[rel="alternate"][hreflang]')
+      .forEach((el) => el.remove());
+    for (const alt of seo.hreflangAlternates) {
+      const link = document.createElement('link');
+      link.setAttribute('rel', 'alternate');
+      link.setAttribute('hreflang', alt.hreflang);
+      link.setAttribute('href', alt.href);
+      document.head.appendChild(link);
+    }
+  }, [route, locale, canonicalPath]);
+
   const handleToggleTheme = useCallback(() => {
     setTheme((prev) => {
       const next: ThemeMode = prev === 'dark' ? 'light' : 'dark';
@@ -115,64 +234,92 @@ export default function App() {
       try {
         localStorage.setItem(LOCALE_STORAGE_KEY, next);
       } catch {
-        // Storage disabled; state updates cleanly in-memory
+        // Storage disabled
+      }
+      if (route === 'home' && typeof window !== 'undefined') {
+        const targetPath = next === 'fa' ? '/fa/' : '/';
+        if (window.location.pathname !== targetPath) {
+          window.history.pushState(null, '', targetPath);
+        }
+        setCanonicalPath(next === 'fa' ? '/fa/' : '/');
       }
       return next;
     });
-  }, []);
+  }, [route]);
 
-  // Update HTML lang/dir & OpenGraph locale metadata dynamically
-  useEffect(() => {
-    document.documentElement.lang = locale;
-    document.documentElement.dir = locale === 'fa' ? 'rtl' : 'ltr';
-    const ogLocale = document.querySelector('meta[property="og:locale"]');
-    if (ogLocale) {
-      ogLocale.setAttribute('content', locale === 'fa' ? 'fa_IR' : 'en_US');
+  const scrollToTopImmediate = useCallback(() => {
+    const lenisInstance = lenisRef.current?.lenis;
+    if (lenisInstance) {
+      lenisInstance.scrollTo(0, { immediate: true });
+    } else if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
-  }, [locale]);
-
-  // Set canonical link from configurable VITE_SITE_URL when provided
-  useEffect(() => {
-    if (!SITE_CONFIG.siteUrl) return;
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', SITE_CONFIG.siteUrl);
   }, []);
 
   const scrollToSection = useCallback(
     (sectionId: string) => {
-      const lenisInstance = lenisRef.current?.lenis;
+      const doScroll = () => {
+        const lenisInstance = lenisRef.current?.lenis;
 
-      if (sectionId === 'home' || sectionId === 'top') {
+        if (sectionId === 'home' || sectionId === 'top') {
+          if (lenisInstance && !prefersReducedMotion) {
+            lenisInstance.scrollTo(0, { duration: 1.0 });
+          } else {
+            window.scrollTo({
+              top: 0,
+              behavior: prefersReducedMotion ? 'auto' : 'smooth',
+            });
+          }
+          return;
+        }
+
+        const element = document.getElementById(sectionId);
+        if (!element) return;
+
         if (lenisInstance && !prefersReducedMotion) {
-          lenisInstance.scrollTo(0, { duration: 1.0 });
+          lenisInstance.scrollTo(element, { offset: -72, duration: 1.05 });
         } else {
-          window.scrollTo({
-            top: 0,
+          element.scrollIntoView({
             behavior: prefersReducedMotion ? 'auto' : 'smooth',
+            block: 'start',
           });
         }
+      };
+
+      if (route !== 'home') {
+        const nextHomePath = getRoutePath('home', locale);
+        if (typeof window !== 'undefined') {
+          const nextHref =
+            sectionId && sectionId !== 'home'
+              ? `${nextHomePath}#${sectionId}`
+              : nextHomePath;
+          window.history.pushState(null, '', nextHref);
+        }
+        setRoute('home');
+        setCanonicalPath(locale === 'fa' ? '/fa/' : '/');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(doScroll);
+        });
         return;
       }
 
-      const element = document.getElementById(sectionId);
-      if (!element) return;
-
-      if (lenisInstance && !prefersReducedMotion) {
-        lenisInstance.scrollTo(element, { offset: -72, duration: 1.05 });
-      } else {
-        element.scrollIntoView({
-          behavior: prefersReducedMotion ? 'auto' : 'smooth',
-          block: 'start',
-        });
-      }
+      doScroll();
     },
-    [prefersReducedMotion]
+    [route, locale, prefersReducedMotion]
   );
+
+  const openFlowCaseStudy = useCallback(() => {
+    if (route === 'flow') {
+      scrollToTopImmediate();
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', '/projects/flow');
+    }
+    setRoute('flow');
+    setCanonicalPath('/projects/flow');
+    scrollToTopImmediate();
+  }, [route, scrollToTopImmediate]);
 
   const scrollToElementCentered = useCallback(
     (element: HTMLElement) => {
@@ -191,6 +338,7 @@ export default function App() {
   );
 
   useEffect(() => {
+    if (route !== 'home') return;
     const sectionIds = [
       'home',
       'about',
@@ -221,7 +369,7 @@ export default function App() {
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [route]);
 
   const sectionLabels: Record<string, string> = {
     home: content.nav.home,
@@ -233,6 +381,8 @@ export default function App() {
     today: locale === 'fa' ? 'امروز' : 'Today',
     contact: content.nav.contact,
   };
+
+  const ResolvedFlowPage = FlowPageComponent ?? LazyFlowCaseStudyPage;
 
   const pageShell = (
     <div className="relative min-h-screen bg-[var(--ermia-bg)] text-[var(--ermia-text)] transition-colors duration-300">
@@ -251,67 +401,113 @@ export default function App() {
         locale={locale}
         activeSection={activeSection}
         sectionLabels={sectionLabels}
+        showSectionBadge={route === 'home'}
       />
 
       <LiquidGlassNav
         locale={locale}
         theme={theme}
+        currentRoute={route}
         content={content.nav}
         activeSection={activeSection}
         onNavigate={scrollToSection}
+        onOpenFlowCaseStudy={openFlowCaseStudy}
         onToggleLocale={handleToggleLocale}
         onToggleTheme={handleToggleTheme}
       />
 
-      <main id="main-content" className="relative z-10">
-        <HeroSection
-          locale={locale}
-          theme={theme}
-          content={content.hero}
-          onNavigate={scrollToSection}
-        />
+      {route === 'flow' ? (
+        <main id="main-content" className="relative z-10">
+          {FlowPageComponent ? (
+            <FlowPageComponent
+              locale={locale}
+              theme={theme}
+              projectsContent={content.projects}
+              navContent={content.nav}
+              onNavigateHome={(sectionId) =>
+                scrollToSection(sectionId ?? 'home')
+              }
+            />
+          ) : (
+            <Suspense
+              fallback={
+                <div className="mx-auto max-w-6xl px-4 pt-36 pb-24 sm:px-6">
+                  <div className="h-10 w-48 animate-pulse rounded-xl bg-[var(--ermia-surface)]" />
+                  <div className="mt-6 h-24 max-w-3xl animate-pulse rounded-2xl bg-[var(--ermia-surface)]" />
+                </div>
+              }
+            >
+              <ResolvedFlowPage
+                locale={locale}
+                theme={theme}
+                projectsContent={content.projects}
+                navContent={content.nav}
+                onNavigateHome={(sectionId) =>
+                  scrollToSection(sectionId ?? 'home')
+                }
+              />
+            </Suspense>
+          )}
+        </main>
+      ) : (
+        <>
+          <main id="main-content" className="relative z-10">
+            <HeroSection
+              locale={locale}
+              theme={theme}
+              content={content.hero}
+              onNavigate={scrollToSection}
+            />
 
-        <EditorialMarquee items={content.hero.marqueeItems} />
+            <EditorialMarquee items={content.hero.marqueeItems} />
 
-        <AboutSection locale={locale} content={content.about} />
+            <AboutSection locale={locale} content={content.about} />
 
-        <JourneyTimelineSection
-          locale={locale}
-          theme={theme}
-          content={content.journey}
-          onNavigate={scrollToSection}
-          onScrollToElement={scrollToElementCentered}
-        />
+            <JourneyTimelineSection
+              locale={locale}
+              theme={theme}
+              content={content.journey}
+              onNavigate={scrollToSection}
+              onScrollToElement={scrollToElementCentered}
+            />
 
-        <LiquidPortalDivider
-          direction="down"
-          bottomBgClass="text-[var(--ermia-bg-secondary)]/70"
-        />
+            <LiquidPortalDivider
+              direction="down"
+              bottomBgClass="text-[var(--ermia-bg-secondary)]/70"
+            />
 
-        <ProjectsSection theme={theme} content={content.projects} />
+            <ProjectsSection
+              locale={locale}
+              theme={theme}
+              content={content.projects}
+              onOpenCaseStudy={openFlowCaseStudy}
+            />
 
-        <LiquidPortalDivider
-          direction="up"
-          bottomBgClass="text-[var(--ermia-bg-secondary)]/70"
-        />
+            <LiquidPortalDivider
+              direction="up"
+              bottomBgClass="text-[var(--ermia-bg-secondary)]/70"
+            />
 
-        <SkillsInterestsSection
-          locale={locale}
-          theme={theme}
-          content={content.skills}
-        />
+            <SkillsInterestsSection
+              locale={locale}
+              theme={theme}
+              content={content.skills}
+            />
 
-        <JournalSection locale={locale} content={content.journal} />
-      </main>
+            <JournalSection locale={locale} content={content.journal} />
+          </main>
 
-      <TodayAndContactSection
-        locale={locale}
-        theme={theme}
-        todayContent={content.today}
-        contactContent={content.contact}
-        navContent={content.nav}
-        onNavigate={scrollToSection}
-      />
+          <TodayAndContactSection
+            locale={locale}
+            theme={theme}
+            todayContent={content.today}
+            contactContent={content.contact}
+            navContent={content.nav}
+            onNavigate={scrollToSection}
+            onOpenFlowCaseStudy={openFlowCaseStudy}
+          />
+        </>
+      )}
     </div>
   );
 
